@@ -5,6 +5,7 @@ import About from '@/components/About';
 import Services from '@/components/Services';
 import HowTo from '@/components/HowTo';
 import Process from '@/components/Process';
+import BaziCalculator from '@/components/BaziCalculator';
 import Testimonials from '@/components/Testimonials';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
@@ -20,6 +21,7 @@ export default function Home() {
       <Services />
       <HowTo />
       <Process />
+      <BaziCalculator />
       <Testimonials />
       <Contact />
       <Footer />
