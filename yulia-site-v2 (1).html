@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Юлия Соколова · Цимень & Бацзы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --white:   #FFFFFF;
+  --off:     #F5F4F1;
+  --light:   #ECEAE5;
+  --ink:     #0F0F0E;
+  --body:    #3A3A38;
+  --muted:   #777772;
+  --faint:   #AEAEA8;
+  --gold:    #9E7B28;
+  --gold2:   #BA9438;
+  --gold3:   #D4AD52;
+  --line:    rgba(15,15,14,.1);
+  --serif:   'Playfair Display', Georgia, serif;
+  --sans:    'Inter', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--white);
+  color: var(--body);
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.6rem 5vw;
+  transition: all .4s;
+}
+nav.scrolled {
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(12px);
+  padding: 1rem 5vw;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.logo {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: .01em;
+}
+.logo span { color: var(--gold); }
+
+.nav-links { display: flex; gap: 2.2rem; list-style: none; }
+.nav-links a {
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--muted);
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--ink); }
+
+.nav-cta {
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--white);
+  background: var(--ink);
+  padding: .7rem 1.6rem;
+  transition: background .25s;
+}
+.nav-cta:hover { background: var(--gold); }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10rem 6vw 6rem;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid var(--line);
+}
+
+.hero-watermark {
+  position: absolute;
+  bottom: -2rem; left: -1rem;
+  font-family: var(--serif);
+  font-size: 22rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--light);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -.04em;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2rem;
+  position: relative;
+}
+.hero-tag::before {
+  content: '';
+  width: 20px; height: 1.5px;
+  background: var(--gold);
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(3.2rem, 6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: -.02em;
+  margin-bottom: .6rem;
+}
+h1 em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.hero-sub {
+  font-family: var(--serif);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 400;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+  line-height: 1.4;
+}
+
+.hero-desc {
+  font-size: 1rem;
+  color: var(--body);
+  max-width: 400px;
+  line-height: 1.8;
+  margin-bottom: 2.8rem;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.btn-primary {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--white);
+  background: var(--ink);
+  padding: 1rem 2.2rem;
+  transition: background .25s;
+}
+.btn-primary:hover { background: var(--gold); }
+
+.btn-secondary {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 2px;
+  transition: color .2s, border-color .2s;
+}
+.btn-secondary:hover { color: var(--gold); border-color: var(--gold); }
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--line);
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+  display: block;
+}
+.stat-label {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: .25rem;
+  display: block;
+}
+
+/* Hero Right */
+.hero-right {
+  background: var(--off);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  position: relative;
+}
+
+.portrait-card {
+  width: min(320px, 85%);
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 3rem 2.5rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(15,15,14,.07);
+}
+
+.portrait-avatar {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: var(--light);
+  border: 2px solid var(--light);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+.portrait-avatar svg { width: 40px; height: 40px; }
+
+.portrait-name {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .3rem;
+}
+.portrait-title {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .3rem;
+}
+.portrait-location {
+  font-size: .9rem;
+  color: var(--muted);
+}
+
+.portrait-divider {
+  width: 40px; height: 2px;
+  background: var(--gold3);
+  margin: 1.8rem auto;
+  opacity: .5;
+}
+
+.portrait-quote {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--body);
+  line-height: 1.6;
+}
+
+/* gold corners */
+.pc { position: absolute; width: 16px; height: 16px; border-color: var(--gold2); border-style: solid; opacity: .4; }
+.pc.tl { top: 10px; left: 10px; border-width: 1.5px 0 0 1.5px; }
+.pc.tr { top: 10px; right: 10px; border-width: 1.5px 1.5px 0 0; }
+.pc.bl { bottom: 10px; left: 10px; border-width: 0 0 1.5px 1.5px; }
+.pc.br { bottom: 10px; right: 10px; border-width: 0 1.5px 1.5px 0; }
+
+/* ── TICKER ── */
+.ticker {
+  background: var(--ink);
+  overflow: hidden;
+  padding: .85rem 0;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 26s linear infinite;
+}
+.ticker-item {
+  font-size: .95rem;
+  font-weight: 400;
+  color: rgba(255,255,255,.6);
+  padding: 0 2rem;
+  white-space: nowrap;
+  font-family: var(--serif);
+  font-style: italic;
+}
+.ticker-sep { color: var(--gold3); font-size: .75rem; align-self: center; opacity: .6; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ── SECTION ── */
+.section { padding: 8rem 5vw; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+
+.section-label {
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin-bottom: 1rem;
+}
+.section-label::before {
+  content: attr(data-n);
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold2);
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  letter-spacing: -.01em;
+}
+
+/* ── ABOUT ── */
+#about { background: var(--off); border-bottom: 1px solid var(--line); }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 6rem;
+  align-items: center;
+  margin-top: 4rem;
+}
+
+.about-image {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: var(--light);
+  border: 1px solid var(--line);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.about-image-char {
+  font-family: var(--serif);
+  font-size: 14rem;
+  font-weight: 700;
+  color: var(--white);
+  user-select: none;
+  line-height: 1;
+}
+.about-image-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(245,244,241,.98) 50%, transparent);
+  padding: 2.5rem 2rem 2rem;
+}
+.ail-name {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ail-sub {
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: .25rem;
+}
+
+.about-content { }
+.about-lead {
+  font-family: var(--serif);
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.55;
+  border-left: 3px solid var(--gold2);
+  padding-left: 1.4rem;
+  margin: 2rem 0 2rem;
+}
+
+.about-text {
+  font-size: 1rem;
+  color: var(--body);
+  line-height: 1.85;
+  margin-bottom: 1rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: 2rem;
+}
+.tag {
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(158,123,40,.07);
+  border: 1px solid rgba(158,123,40,.2);
+  padding: .4rem 1rem;
+  transition: all .2s;
+}
+.tag:hover { background: rgba(158,123,40,.12); border-color: var(--gold); }
+
+/* ── SERVICES ── */
+#services { background: var(--white); border-bottom: 1px solid var(--line); }
+
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 3.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.services-note {
+  font-size: .9rem;
+  color: var(--muted);
+  text-align: right;
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line);
+}
+.services-grid > * {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.services-grid > *:nth-child(3n) { border-right: none; }
+.services-grid > *:nth-last-child(-n+3) { border-bottom: none; }
+
+.service-card {
+  padding: 2.5rem 2.2rem;
+  background: var(--white);
+  position: relative;
+  transition: background .25s;
+  overflow: hidden;
+}
+.service-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px; width: 0;
+  background: var(--gold2);
+  transition: width .4s ease;
+}
+.service-card:hover { background: var(--off); }
+.service-card:hover::after { width: 100%; }
+
+.service-glyph {
+  font-size: 2rem;
+  color: var(--gold2);
+  opacity: .5;
+  display: block;
+  margin-bottom: 1.2rem;
+}
+
+.service-name {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .7rem;
+}
+
+.service-desc {
+  font-size: .95rem;
+  color: var(--body);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+}
+
+.service-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 1.2rem;
+}
+
+.service-price {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.service-format {
+  font-size: .78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+
+.service-card.dark {
+  background: var(--ink);
+  border-right: none;
+}
+.service-card.dark:hover { background: #1a1a18; }
+.service-card.dark .service-name { color: var(--white); }
+.service-card.dark .service-desc { color: rgba(255,255,255,.55); }
+.service-card.dark::after { background: var(--gold2); }
+
+/* ── HOW TO ASK ── */
+#howto { background: var(--off); border-bottom: 1px solid var(--line); }
+
+.howto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  margin-top: 3.5rem;
+  align-items: start;
+}
+
+.howto-intro {
+  font-size: 1.05rem;
+  color: var(--body);
+  line-height: 1.85;
+  margin-bottom: 2rem;
+}
+
+.examples {
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 2rem 2.2rem;
+}
+.examples-title {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 1.2rem;
+}
+.examples-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+.examples-list li {
+  font-size: .95rem;
+  color: var(--body);
+  line-height: 1.6;
+  padding-left: 1rem;
+  border-left: 2px solid var(--light);
+  transition: border-color .2s;
+}
+.examples-list li:hover { border-left-color: var(--gold2); }
+
+.howto-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.howto-step {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 1.2rem;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.howto-step:last-child { border-bottom: none; }
+.howto-step-num {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold2);
+  line-height: 1;
+  padding-top: .1rem;
+}
+.howto-step-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: .4rem;
+}
+.howto-step-text {
+  font-size: .95rem;
+  color: var(--body);
+  line-height: 1.75;
+}
+
+/* ── PROCESS ── */
+#process { background: var(--white); border-bottom: 1px solid var(--line); }
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+  margin-top: 3.5rem;
+}
+.process-grid > * {
+  border-right: 1px solid var(--line);
+}
+.process-grid > *:last-child { border-right: none; }
+
+.process-card {
+  padding: 2.5rem 2rem;
+  background: var(--white);
+  transition: background .25s;
+}
+.process-card:hover { background: var(--off); }
+
+.process-num {
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--light);
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  transition: color .3s;
+}
+.process-card:hover .process-num { color: var(--gold3); opacity: .6; }
+
+.process-title {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .6rem;
+}
+.process-text {
+  font-size: .95rem;
+  color: var(--body);
+  line-height: 1.8;
+}
+
+/* ── TESTIMONIALS ── */
+#testimonials { background: var(--off); border-bottom: 1px solid var(--line); }
+
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+}
+
+.testi-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 2.2rem;
+  position: relative;
+  transition: transform .3s, box-shadow .3s;
+}
+.testi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(15,15,14,.07);
+}
+.testi-card::before {
+  content: '"';
+  position: absolute;
+  top: 1rem; right: 1.5rem;
+  font-family: var(--serif);
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gold);
+  opacity: .12;
+  line-height: 1;
+}
+
+.testi-text {
+  font-size: 1rem;
+  color: var(--body);
+  line-height: 1.8;
+  margin-bottom: 1.8rem;
+}
+
+.testi-divider {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: 1rem;
+}
+.testi-divider-line { flex: 1; height: 1px; background: var(--line); }
+.testi-divider-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold2);
+  flex-shrink: 0;
+}
+
+.testi-name {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.testi-city {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: .2rem;
+}
+
+/* ── CONTACT ── */
+#contact {
+  background: var(--ink);
+  padding: 9rem 5vw;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#contact::before {
+  content: '約';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--serif);
+  font-size: 24rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.025);
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.contact-inner { position: relative; z-index: 1; }
+
+.contact-label {
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.contact-label::before,
+.contact-label::after {
+  content: '';
+  display: block;
+  width: 32px; height: 1px;
+  background: var(--gold);
+  opacity: .4;
+}
+
+.contact-title {
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  margin-bottom: 1.2rem;
+}
+.contact-title em { font-style: italic; color: var(--gold3); font-weight: 400; }
+
+.contact-sub {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,.5);
+  max-width: 440px;
+  margin: 0 auto 3rem;
+  line-height: 1.8;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 4rem;
+}
+
+.cbtn-gold {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--gold2);
+  padding: 1.1rem 2.4rem;
+  transition: background .25s, transform .2s;
+}
+.cbtn-gold:hover { background: var(--gold3); transform: translateY(-2px); }
+
+.cbtn-outline {
+  font-size: .85rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(255,255,255,.7);
+  border: 1.5px solid rgba(255,255,255,.2);
+  padding: 1.1rem 2.4rem;
+  transition: all .25s;
+}
+.cbtn-outline:hover { border-color: rgba(255,255,255,.5); color: var(--white); }
+
+.contact-info {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  flex-wrap: wrap;
+  padding-top: 3rem;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.contact-info-item { text-align: center; }
+.ci-label {
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  margin-bottom: .5rem;
+}
+.ci-val {
+  font-size: 1rem;
+  color: rgba(255,255,255,.7);
+  text-decoration: none;
+  transition: color .2s;
+}
+.ci-val:hover { color: var(--gold3); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 2rem 5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.f-logo {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+  text-decoration: none;
+}
+.f-logo span { color: var(--gold2); }
+
+.f-links { display: flex; gap: 1.8rem; list-style: none; }
+.f-links a {
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(255,255,255,.3);
+  transition: color .2s;
+}
+.f-links a:hover { color: rgba(255,255,255,.7); }
+
+.f-copy {
+  font-size: .78rem;
+  color: rgba(255,255,255,.2);
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s .15s ease, transform .6s .15s ease;
+}
+.reveal-delay.visible { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1050px) {
+  #hero { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .hero-left { padding: 8rem 5vw 5rem; border-right: none; justify-content: flex-start; }
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .about-image { display: none; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .services-grid > * { border-bottom: 1px solid var(--line) !important; }
+  .services-grid > *:nth-child(2n) { border-right: none; }
+  .process-grid { grid-template-columns: 1fr 1fr; }
+  .process-grid > * { border-bottom: 1px solid var(--line); }
+  .howto-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+@media (max-width: 680px) {
+  nav { padding: 1rem 5vw; }
+  .nav-links { display: none; }
+  .services-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .process-grid { grid-template-columns: 1fr; }
+  .process-grid > * { border-right: none; }
+  footer { flex-direction: column; text-align: center; }
+  .f-links { flex-wrap: wrap; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo">Юлия <span>Соколова</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">Обо мне</a></li>
+    <li><a href="#services">Услуги</a></li>
+    <li><a href="#howto">Как задать вопрос</a></li>
+    <li><a href="#testimonials">Отзывы</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Записаться</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-watermark">命</div>
+
+    <div class="hero-tag">Цимень · Бацзы · Выбор дат</div>
+
+    <h1>
+      Твоя судьба —<br>
+      <em>твоя стратегия</em>
+    </h1>
+
+    <p class="hero-sub">Китайская метафизика · Более 10 лет практики</p>
+
+    <p class="hero-desc">
+      Помогаю осознанным людям разобраться в себе, выстроить стратегию жизни
+      и действовать в нужное время в нужном направлении. Не магия — система.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#contact" class="btn-primary">Записаться на консультацию</a>
+      <a href="#services" class="btn-secondary">Об услугах</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <span class="stat-num">10+</span>
+        <span class="stat-label">Лет практики</span>
+      </div>
+      <div>
+        <span class="stat-num">500+</span>
+        <span class="stat-label">Консультаций</span>
+      </div>
+      <div>
+        <span class="stat-num">Онлайн</span>
+        <span class="stat-label">и офлайн · Москва</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="portrait-card">
+      <div class="pc tl"></div><div class="pc tr"></div>
+      <div class="pc bl"></div><div class="pc br"></div>
+
+      <div class="portrait-avatar">
+        <svg viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="14" r="7.5" stroke="#9E7B28" stroke-width="1.2"/>
+          <path d="M4 38c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="#9E7B28" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="portrait-name">Юлия Соколова</div>
+      <div class="portrait-title">Мастер китайской метафизики</div>
+      <div class="portrait-location">Москва · Онлайн по всему миру</div>
+
+      <div class="portrait-divider"></div>
+
+      <div class="portrait-quote">
+        «Волшебная таблетка — это вы сами. Моя задача — помочь вам это увидеть.»
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">Цимень Дунь Цзя</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Бацзы</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Выбор дат</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Фэн Шуй</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Прогнозы по годам</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Активизации</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Анализ судьбы</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Онлайн · Офлайн</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Цимень Дунь Цзя</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Бацзы</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Выбор дат</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Фэн Шуй</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Прогнозы по годам</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Активизации</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Анализ судьбы</span><span class="ticker-sep">◆</span>
+    <span class="ticker-item">Онлайн · Офлайн</span><span class="ticker-sep">◆</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+
+      <div class="about-image reveal">
+        <div class="about-image-char">命</div>
+        <div class="about-image-label">
+          <div class="ail-name">Юлия Соколова</div>
+          <div class="ail-sub">Ваше фото здесь</div>
+        </div>
+      </div>
+
+      <div class="reveal-delay">
+        <div class="section-label" data-n="01">Обо мне</div>
+        <h2>Стратег,<br>а не предсказатель</h2>
+
+        <p class="about-lead">
+          Я не говорю «всё будет хорошо». Я показываю, что нужно сделать, чтобы было хорошо — и когда.
+        </p>
+
+        <p class="about-text">
+          Более 10 лет я занимаюсь китайской метафизикой — Цимень Дунь Цзя, Бацзы, Фэн Шуй и выбором дат.
+          Провела сотни консультаций для людей из России и других стран.
+        </p>
+        <p class="about-text">
+          Работаю с теми, кто готов думать стратегически, брать ответственность за свои решения
+          и понимать: перемены происходят через действие, а не через ожидание.
+        </p>
+
+        <div class="tags">
+          <span class="tag">Цимень Дунь Цзя</span>
+          <span class="tag">Бацзы</span>
+          <span class="tag">Выбор дат</span>
+          <span class="tag">Фэн Шуй</span>
+          <span class="tag">Активизации</span>
+          <span class="tag">Совместимость</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="section-inner">
+    <div class="services-header">
+      <div>
+        <div class="section-label" data-n="02">Услуги</div>
+        <h2>С чем я работаю</h2>
+      </div>
+      <p class="services-note">Онлайн и офлайн (Москва). Запись через мессенджер или почту.</p>
+    </div>
+
+    <div class="services-grid reveal">
+      <div class="service-card">
+        <span class="service-glyph">八字</span>
+        <div class="service-name">Консультация по Бацзы</div>
+        <p class="service-desc">Разбор карты рождения: предназначение, профессия, сильные стороны, личность. Анализ судьбы и прогнозы по годам.</p>
+        <div class="service-footer">
+          <div class="service-price">от 5 000 ₽</div>
+          <div class="service-format">90 мин · Zoom / Офлайн</div>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <span class="service-glyph">奇門</span>
+        <div class="service-name">Расклад Цимень</div>
+        <p class="service-desc">На любую ситуацию: отношения, бизнес, партнёрство, сделки с недвижимостью, найм, поездки, здоровье и другое.</p>
+        <div class="service-footer">
+          <div class="service-price">от 3 500 ₽</div>
+          <div class="service-format">60 мин · Zoom / Офлайн</div>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <span class="service-glyph">擇日</span>
+        <div class="service-name">Выбор даты</div>
+        <p class="service-desc">Подбор благоприятного дня для любого события: свадьба, переезд, открытие бизнеса, подписание договора, операция.</p>
+        <div class="service-footer">
+          <div class="service-price">от 2 500 ₽</div>
+          <div class="service-format">Письменно / 45 мин</div>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <span class="service-glyph">風水</span>
+        <div class="service-name">Аудит по Фэн Шуй</div>
+        <p class="service-desc">Анализ жилья или офиса. Активация секторов здоровья, достатка, отношений. Конкретный план работы с пространством.</p>
+        <div class="service-footer">
+          <div class="service-price">от 7 000 ₽</div>
+          <div class="service-format">По плану · Онлайн / Выезд</div>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <span class="service-glyph">活化</span>
+        <div class="service-name">Активизации по Цимень</div>
+        <p class="service-desc">Подбор направлений, времени и маршрутов для активизации нужных энергий: удача, деньги, отношения, здоровье, карьера.</p>
+        <div class="service-footer">
+          <div class="service-price">от 2 000 ₽</div>
+          <div class="service-format">Письменно / Онлайн</div>
+        </div>
+      </div>
+
+      <div class="service-card dark">
+        <div class="service-name">Не знаете,<br>с чего начать?</div>
+        <p class="service-desc">Напишите — вместе разберёмся, какой формат подойдёт для вашего запроса.</p>
+        <div style="margin-top: auto; padding-top: 2rem;">
+          <a href="#contact" class="btn-primary" style="display:inline-block; font-size:.8rem; padding:.9rem 1.8rem;">Написать</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO ASK -->
+<section class="section" id="howto">
+  <div class="section-inner">
+    <div class="section-label" data-n="03">Важно</div>
+    <h2>Как правильно задать вопрос</h2>
+
+    <div class="howto-grid">
+      <div class="reveal">
+        <p class="howto-intro">
+          От точности вопроса зависит точность расклада. Цимень работает с конкретными ситуациями — чем конкретнее вопрос, тем точнее карта показывает исходы и пути.
+        </p>
+
+        <div class="examples">
+          <div class="examples-title">Примеры хорошо сформулированных вопросов</div>
+          <ul class="examples-list">
+            <li>Стоит ли мне принять это предложение о работе?</li>
+            <li>Есть ли перспектива в отношениях с этим партнёром?</li>
+            <li>Когда лучше открыть ИП или подписать договор?</li>
+            <li>Стоит ли покупать эту квартиру?</li>
+            <li>Как найти нужного сотрудника на эту должность?</li>
+            <li>Что мешает росту дохода прямо сейчас?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="reveal-delay">
+        <div class="howto-steps">
+          <div class="howto-step">
+            <div class="howto-step-num">1</div>
+            <div>
+              <div class="howto-step-title">Один вопрос — одна ситуация</div>
+              <div class="howto-step-text">Не смешивайте несколько тем. Карта раскладывается на конкретную ситуацию, а не на «всё сразу».</div>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-step-num">2</div>
+            <div>
+              <div class="howto-step-title">Конкретика, а не общее</div>
+              <div class="howto-step-text">Не «как мне стать богатым», а «стоит ли мне инвестировать в этот проект» — разница принципиальная.</div>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-step-num">3</div>
+            <div>
+              <div class="howto-step-title">Реальный выбор прямо сейчас</div>
+              <div class="howto-step-text">Вопрос должен касаться конкретного выбора, который стоит перед вами сейчас — не гипотетического.</div>
+            </div>
+          </div>
+          <div class="howto-step">
+            <div class="howto-step-num">4</div>
+            <div>
+              <div class="howto-step-title">Будьте готовы действовать</div>
+              <div class="howto-step-text">Расклад показывает направление. Результат зависит от ваших решений — карта лишь освещает путь.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section" id="process">
+  <div class="section-inner">
+    <div class="section-label" data-n="04">Процесс</div>
+    <h2>Как проходит работа</h2>
+
+    <div class="process-grid reveal">
+      <div class="process-card">
+        <div class="process-num">01</div>
+        <div class="process-title">Заявка</div>
+        <p class="process-text">Пишете в мессенджер или на почту. Выбираем формат — онлайн или встреча в Москве.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">02</div>
+        <div class="process-title">Подготовка</div>
+        <p class="process-text">Строю карту, готовлю разбор под ваш запрос. К встрече всё уже проанализировано.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">03</div>
+        <div class="process-title">Консультация</div>
+        <p class="process-text">Разбираем карту, отвечаю на вопросы, даю конкретные рекомендации по стратегии.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">04</div>
+        <div class="process-title">Материалы</div>
+        <p class="process-text">После встречи — запись и конспект с ключевыми выводами и рекомендациями.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" id="testimonials">
+  <div class="section-inner">
+    <div class="section-label" data-n="05">Отзывы</div>
+    <h2>Что говорят клиенты</h2>
+
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <p class="testi-text">После консультации по Бацзы наконец поняла, почему одни решения давались легко, а другие — как в стену. Юля объяснила это так точно и системно, что стало по-настоящему легче жить.</p>
+        <div class="testi-divider"><div class="testi-divider-line"></div><div class="testi-divider-dot"></div><div class="testi-divider-line"></div></div>
+        <div class="testi-name">Екатерина М.</div>
+        <div class="testi-city">Москва</div>
+      </div>
+      <div class="testi-card reveal">
+        <p class="testi-text">Я скептик. Но расклад Цимень на бизнес-партнёрство дал такой точный анализ и конкретный план действий, что я не мог его игнорировать. Через три месяца всё вышло именно так, как описала Юля.</p>
+        <div class="testi-divider"><div class="testi-divider-line"></div><div class="testi-divider-dot"></div><div class="testi-divider-line"></div></div>
+        <div class="testi-name">Алексей В.</div>
+        <div class="testi-city">Москва</div>
+      </div>
+      <div class="testi-card reveal">
+        <p class="testi-text">Выбор даты для открытия бизнеса — казалось бы, мелочь. Но Юля объяснила логику так чётко, что я поняла: это не суеверие, это система. Открылись в нужный день — старт оказался мощным.</p>
+        <div class="testi-divider"><div class="testi-divider-line"></div><div class="testi-divider-dot"></div><div class="testi-divider-line"></div></div>
+        <div class="testi-name">Марина Л.</div>
+        <div class="testi-city">Санкт-Петербург</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="contact-label">Записаться на консультацию</div>
+    <h2 class="contact-title reveal">
+      Готовы строить<br><em>свою стратегию?</em>
+    </h2>
+    <p class="contact-sub reveal-delay">
+      Напишите мне — отвечу в течение дня. Подберём формат,
+      который подойдёт для вашего запроса.
+    </p>
+    <div class="contact-buttons reveal">
+      <a href="https://t.me/" class="cbtn-gold">Написать в Telegram</a>
+      <a href="https://wa.me/" class="cbtn-outline">WhatsApp</a>
+    </div>
+
+    <div class="contact-info">
+      <div class="contact-info-item">
+        <div class="ci-label">Telegram</div>
+        <a href="https://t.me/" class="ci-val">@yulia_sokolova</a>
+      </div>
+      <div class="contact-info-item">
+        <div class="ci-label">Email</div>
+        <a href="mailto:" class="ci-val">hello@yulia.ru</a>
+      </div>
+      <div class="contact-info-item">
+        <div class="ci-label">Формат</div>
+        <div class="ci-val">Онлайн · Офлайн Москва</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="f-logo">Юлия <span>Соколова</span></a>
+  <ul class="f-links">
+    <li><a href="#about">О мне</a></li>
+    <li><a href="#services">Услуги</a></li>
+    <li><a href="#howto">Как задать вопрос</a></li>
+    <li><a href="#testimonials">Отзывы</a></li>
+    <li><a href="#contact">Контакты</a></li>
+  </ul>
+  <div class="f-copy">© 2025 Юлия Соколова</div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', scrollY > 60);
+});
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal, .reveal-delay').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
