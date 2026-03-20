@@ -1,23 +1,35 @@
+const items = [
+  'Цимень Дунь Цзя',
+  'Бацзы',
+  'Выбор дат',
+  'Фэн Шуй',
+  'Прогнозы по годам',
+  'Активизации',
+  'Анализ судьбы',
+  'Онлайн · Офлайн',
+];
+
+function TickerGroup() {
+  return (
+    <>
+      {items.map((item, i) => (
+        <span key={i}>
+          <span className="ticker-item">{item}</span>
+          <span className="ticker-sep">◆</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
 export default function Ticker() {
   return (
     <div className="ticker">
       <div className="ticker-track">
-        <span className="ticker-item">Цимень Дунь Цзя</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Бацзы</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Выбор дат</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Фэн Шуй</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Прогнозы по годам</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Активизации</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Анализ судьбы</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Онлайн · Офлайн</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Цимень Дунь Цзя</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Бацзы</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Выбор дат</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Фэн Шуй</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Прогнозы по годам</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Активизации</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Анализ судьбы</span><span className="ticker-sep">◆</span>
-        <span className="ticker-item">Онлайн · Офлайн</span><span className="ticker-sep">◆</span>
+        <TickerGroup />
+        <TickerGroup />
+        <TickerGroup />
+        <TickerGroup />
       </div>
     </div>
   );
