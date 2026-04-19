@@ -15,7 +15,7 @@ export default function FloatingCalcBtn() {
         className="floating-calc-btn"
         style={{
           position: 'fixed',
-          top: '1rem',
+          bottom: '1.8rem',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 300,
@@ -27,12 +27,13 @@ export default function FloatingCalcBtn() {
           letterSpacing: '.12em',
           textTransform: 'uppercase',
           textDecoration: 'none',
-          padding: '.55rem 1.4rem',
+          padding: '.7rem 2rem',
           whiteSpace: 'nowrap',
-          boxShadow: '0 2px 12px rgba(158,123,40,.35)',
+          boxShadow: '0 4px 20px rgba(158,123,40,.4)',
+          borderRadius: '2px',
         }}
       >
-        Калькулятор
+        ✦ Калькулятор
       </Link>
     </>
   )
