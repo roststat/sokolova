@@ -9,10 +9,12 @@ import Testimonials from '@/components/Testimonials';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import RevealObserver from '@/components/RevealObserver';
+import FloatingCalcBtn from '@/components/FloatingCalcBtn';
 
 export default function Home() {
   return (
     <>
+      <FloatingCalcBtn />
       <Nav />
       <Hero />
       <Ticker />
