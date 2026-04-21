@@ -112,6 +112,103 @@ const CITIES: City[] = [
   { name: 'Ulaanbaatar',   nameRu: 'Улан-Батор',       country: 'Монголия',    gmt: 8,    lon: 106.92,  lat: 47.91 },
 ]
 
+// ── DST auto-detection ───────────────────────────────────────────────────────
+// Returns: 1 = DST was in effect (subtract 1h), 0 = no DST, -1 = unknown (show checkbox)
+// Based on historical DST records for each country
+// "Summer months" = April–October (Northern Hemisphere approximation for birth date check)
+
+function detectDst(country: string, birthYear: number, birthMonth: number): 0 | 1 | -1 {
+  const isSummer = birthMonth >= 4 && birthMonth <= 10
+
+  switch (country) {
+    case 'Россия':
+      if (birthYear < 1981) return 0
+      if (birthYear <= 2010) return isSummer ? 1 : 0  // seasonal DST
+      if (birthYear <= 2013) return 1                  // permanent summer time 2011–2013
+      return 0                                         // abolished Oct 2014
+
+    case 'Украина':
+      if (birthYear < 1981) return 0
+      return isSummer ? 1 : 0                          // DST active to present
+
+    case 'Беларусь':
+      if (birthYear < 1981) return 0
+      if (birthYear <= 2010) return isSummer ? 1 : 0  // seasonal DST
+      return 1                                         // permanent summer time since 2011
+
+    case 'Казахстан':
+      if (birthYear < 1981 || birthYear > 2004) return 0
+      return isSummer ? 1 : 0
+
+    case 'Узбекистан':
+      if (birthYear < 1981 || birthYear > 1991) return 0
+      return isSummer ? 1 : 0
+
+    case 'Кыргызстан':
+      if (birthYear < 1981 || birthYear > 2005) return 0
+      return isSummer ? 1 : 0
+
+    case 'Азербайджан':
+      if (birthYear < 1981) return 0
+      if (birthYear <= 1992) return isSummer ? 1 : 0
+      if (birthYear <= 1995) return 0
+      if (birthYear <= 2015) return isSummer ? 1 : 0
+      return 0                                         // abolished Mar 2016
+
+    case 'Грузия':
+      if (birthYear < 1981 || birthYear > 2004) return 0
+      return isSummer ? 1 : 0
+
+    case 'Армения':
+      if (birthYear < 1981) return 0
+      if (birthYear <= 1995) return isSummer ? 1 : 0
+      if (birthYear <= 1996) return 0
+      if (birthYear <= 2011) return isSummer ? 1 : 0
+      return 0                                         // abolished 2012
+
+    case 'Эстония':
+    case 'Латвия':
+    case 'Литва':
+      if (birthYear < 1981) return 0
+      return isSummer ? 1 : 0                          // DST active to present
+
+    case 'Финляндия':
+    case 'Германия':
+    case 'Франция':
+    case 'Испания':
+    case 'Италия':
+    case 'Польша':
+    case 'Чехия':
+    case 'Австрия':
+    case 'Нидерланды':
+    case 'Бельгия':
+    case 'Швейцария':
+    case 'Румыния':
+    case 'Болгария':
+    case 'Греция':
+    case 'Швеция':
+    case 'Норвегия':
+      // EU: DST last Sun March → last Sun October, active since ~1981
+      if (birthYear < 1981) return -1
+      return isSummer ? 1 : 0
+
+    case 'Великобритания':
+      // UK: DST last Sun March → last Sun October
+      return isSummer ? 1 : 0
+
+    case 'Израиль':
+      return isSummer ? 1 : 0
+
+    case 'США':
+    case 'Канада':
+      // Mar 2nd Sun → Nov 1st Sun (since 2007), before: Apr–Oct
+      return isSummer ? 1 : 0
+
+    default:
+      return -1  // unknown — show checkbox
+  }
+}
+
 function searchCities(query: string): City[] {
   if (!query || query.length < 1) return []
   const q = query.toLowerCase()
@@ -1159,8 +1256,9 @@ function BaziCalculatorInner() {
   const [gmtOffset,     setGmtOffset]     = useState(() => parseFloat(searchParams.get('gmt') ?? '3'))
   const [longitude,     setLongitude]     = useState(() => parseFloat(searchParams.get('lon') ?? '37.62'))
   const [useSolarTime,  setUseSolarTime]  = useState(() => searchParams.get('sol') === '1')
-  const [dst,           setDst]           = useState(() => searchParams.get('dst') === '1')
+  const [dstManual,     setDstManual]     = useState(() => searchParams.get('dst') === '1')
   const [dayChangeAt23, setDayChangeAt23] = useState(() => searchParams.get('d23') === '1')
+  const [selectedCity,  setSelectedCity]  = useState<City | null>(null)
   const [result,        setResult]        = useState<BaziResult | null>(null)
   const [viewMode,      setViewMode]      = useState<ViewMode>('bazi')
   const [copyDone,      setCopyDone]      = useState(false)
@@ -1173,9 +1271,33 @@ function BaziCalculatorInner() {
   }, [])
 
   const handleCitySelect = (city: City) => {
+    setSelectedCity(city)
     setGmtOffset(city.gmt)
     setLongitude(city.lon)
   }
+
+  // Determine DST: auto if city known, manual checkbox as fallback
+  const getDstOffset = (year: number, month: number): { dst: number; dstInfo: string } => {
+    if (!useSolarTime) return { dst: 0, dstInfo: '' }
+    if (selectedCity) {
+      const auto = detectDst(selectedCity.country, year, month)
+      if (auto !== -1) {
+        const label = auto === 1 ? 'летнее время: −60 мин (авто)' : 'летнее время: нет (авто)'
+        return { dst: auto, dstInfo: label }
+      }
+    }
+    // Fallback: manual checkbox
+    return {
+      dst: dstManual ? 1 : 0,
+      dstInfo: dstManual ? 'летнее время: −60 мин (вручную)' : '',
+    }
+  }
+
+  // Is DST auto-detected (hide manual checkbox)?
+  const dstIsAuto = selectedCity !== null && detectDst(selectedCity.country,
+    parseInt(dateVal.split('-')[0] ?? '1990'),
+    parseInt(dateVal.split('-')[1] ?? '1')
+  ) !== -1
 
   const handleCalculate = () => {
     if (!dateVal) return
@@ -1198,6 +1320,8 @@ function BaziCalculatorInner() {
       calcHour = 23
     }
 
+    const { dst } = getDstOffset(year, month)
+
     // Update URL with current params (no page reload)
     const params = new URLSearchParams({
       d: dateVal,
@@ -1207,7 +1331,7 @@ function BaziCalculatorInner() {
       lon: String(longitude),
       ...(noTime        && { nt: '1' }),
       ...(useSolarTime  && { sol: '1' }),
-      ...(dst           && { dst: '1' }),
+      ...(dstManual     && { dst: '1' }),
       ...(dayChangeAt23 && { d23: '1' }),
     })
     router.replace(`/bazi?${params.toString()}`, { scroll: false })
@@ -1220,7 +1344,7 @@ function BaziCalculatorInner() {
       gmtOffset,
       useSolarTime ? longitude : 0,
       useSolarTime,
-      useSolarTime ? (dst ? 1 : 0) : 0
+      dst
     ))
   }
 
@@ -1329,10 +1453,22 @@ function BaziCalculatorInner() {
             <input type="checkbox" checked={useSolarTime} onChange={e => setUseSolarTime(e.target.checked)} />
             Истинное солнечное время
           </label>
-          <label style={{ ...s.checkLabel, opacity: useSolarTime ? 1 : 0.4, pointerEvents: useSolarTime ? 'auto' : 'none' }}>
-            <input type="checkbox" checked={dst} onChange={e => setDst(e.target.checked)} disabled={!useSolarTime} />
-            Летнее время (+1 час) при рождении
-          </label>
+          {useSolarTime && dstIsAuto && (() => {
+            const year  = parseInt(dateVal.split('-')[0] ?? '1990')
+            const month = parseInt(dateVal.split('-')[1] ?? '1')
+            const auto  = detectDst(selectedCity!.country, year, month)
+            return (
+              <div style={{ fontSize: '.78rem', color: auto === 1 ? '#2e7d32' : 'var(--muted)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>
+                <span>{auto === 1 ? '☀ Летнее время: есть (авто)' : '● Летнее время: нет (авто)'}</span>
+              </div>
+            )
+          })()}
+          {useSolarTime && !dstIsAuto && (
+            <label style={s.checkLabel}>
+              <input type="checkbox" checked={dstManual} onChange={e => setDstManual(e.target.checked)} />
+              Летнее время (+1 час) при рождении
+            </label>
+          )}
           <label style={s.checkLabel}>
             <input type="checkbox" checked={dayChangeAt23} onChange={e => setDayChangeAt23(e.target.checked)} />
             Смена суток в 23:00 (子時)
