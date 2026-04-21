@@ -46,7 +46,7 @@ export default function Services() {
             <div className="service-name">Аудит по Фэн Шуй</div>
             <p className="service-desc">Анализ жилья или офиса. Активация секторов здоровья, достатка, отношений. Конкретный план работы с пространством.</p>
             <div className="service-footer">
-              <div className="service-price">от 7 000 ₽</div>
+              <div className="service-price">По договорённости</div>
               <div className="service-format">По плану · Онлайн / Выезд</div>
             </div>
           </div>

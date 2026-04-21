@@ -5,10 +5,14 @@ export default function About() {
         <div className="about-grid">
 
           <div className="about-image reveal">
-            <div className="about-image-char">命</div>
+            <img
+              src="/yulia.jpg"
+              alt="Юлия Соколова"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            />
             <div className="about-image-label">
               <div className="ail-name">Юлия Соколова</div>
-              <div className="ail-sub">Ваше фото здесь</div>
+              <div className="ail-sub">Мастер китайской метафизики</div>
             </div>
           </div>
 
