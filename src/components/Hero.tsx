@@ -39,28 +39,6 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-right">
-        <div className="portrait-card">
-          <div className="pc tl"></div><div className="pc tr"></div>
-          <div className="pc bl"></div><div className="pc br"></div>
-
-          <div className="portrait-avatar">
-            <svg viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="14" r="7.5" stroke="#9E7B28" strokeWidth="1.2" />
-              <path d="M4 38c0-8.8 7.2-16 16-16s16 7.2 16 16" stroke="#9E7B28" strokeWidth="1.2" />
-            </svg>
-          </div>
-          <div className="portrait-name">Юлия Соколова</div>
-          <div className="portrait-title">Мастер китайской метафизики</div>
-          <div className="portrait-location">Москва · Онлайн по всему миру</div>
-
-          <div className="portrait-divider"></div>
-
-          <div className="portrait-quote">
-            «Волшебная таблетка — это вы сами. Моя задача — помочь вам это увидеть.»
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
