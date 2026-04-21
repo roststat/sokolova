@@ -268,16 +268,18 @@ export function applyTimeCorrection(
   // Convert to UTC first
   let totalMinutes = hour * 60 + minute - gmtOffset * 60
 
-  // Solar time correction: 4 minutes per degree from standard meridian
+  // Solar time correction: 4 minutes per degree difference from standard meridian
+  // Standard meridian = gmtOffset * 15 degrees (exact, no rounding)
   let solarNote = ''
   if (useSolarTime) {
-    const standardMeridian = Math.round(gmtOffset) * 15
+    const standardMeridian = gmtOffset * 15
     const longitudeDiff = longitude - standardMeridian
-    const correctionMinutes = Math.round(longitudeDiff * 4)
+    const correctionMinutes = longitudeDiff * 4  // keep fractional for accuracy
     totalMinutes += correctionMinutes
-    solarNote = correctionMinutes >= 0
-      ? `+${correctionMinutes} мин (истинное солнечное время)`
-      : `${correctionMinutes} мин (истинное солнечное время)`
+    const corrRounded = Math.round(correctionMinutes)
+    solarNote = corrRounded >= 0
+      ? `+${corrRounded} мин (долгота ${longitude > 0 ? '+' : ''}${longitude}°, стандарт ${standardMeridian}°)`
+      : `${corrRounded} мин (долгота ${longitude > 0 ? '+' : ''}${longitude}°, стандарт ${standardMeridian}°)`
   }
 
   // Convert back to local date/time handling day overflow
@@ -768,7 +770,7 @@ export function calculateBazi(
   let calcHour = hour ?? 12, calcMinute = minute
   let solarTimeNote: string | undefined
 
-  if (useSolarTime && longitude !== 0) {
+  if (useSolarTime) {
     const corrected = applyTimeCorrection(
       year, month, day, calcHour, calcMinute, gmtOffset, longitude, true
     )
