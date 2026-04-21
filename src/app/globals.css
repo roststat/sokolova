@@ -489,6 +489,7 @@ h2 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   border: 1px solid var(--line);
+  align-items: start;
 }
 .services-grid > * {
   border-right: 1px solid var(--line);
@@ -656,6 +657,7 @@ h2 {
   grid-template-columns: repeat(4, 1fr);
   border: 1px solid var(--line);
   margin-top: 3.5rem;
+  align-items: start;
 }
 .process-grid > * {
   border-right: 1px solid var(--line);
@@ -701,6 +703,7 @@ h2 {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-top: 3.5rem;
+  align-items: start;
 }
 
 .testi-card {
