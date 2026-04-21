@@ -81,7 +81,6 @@ nav.scrolled {
 
 /* ── HERO ── */
 #hero {
-  min-height: 100vh;
   display: flex;
   border-bottom: 1px solid var(--line);
 }
@@ -90,7 +89,7 @@ nav.scrolled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 10rem 10vw 6rem;
+  padding: 10rem 10vw 7rem;
   position: relative;
   overflow: hidden;
   width: 100%;

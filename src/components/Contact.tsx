@@ -20,11 +20,7 @@ export default function Contact() {
             <div className="ci-label">Telegram</div>
             <a href="https://t.me/lovabazi" className="ci-val">@lovabazi</a>
           </div>
-          <div className="contact-info-item">
-            <div className="ci-label">Email</div>
-            <a href="mailto:" className="ci-val">hello@yulia.ru</a>
-          </div>
-          <div className="contact-info-item">
+<div className="contact-info-item">
             <div className="ci-label">Формат</div>
             <div className="ci-val">Онлайн · Офлайн Москва</div>
           </div>
