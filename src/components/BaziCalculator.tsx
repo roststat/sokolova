@@ -1,38 +1,125 @@
 'use client'
 
-import { useState, CSSProperties } from 'react'
-import { calculateBazi, ELEMENT_COLORS, getQiPhase } from '@/lib/bazi'
-import type { BaziResult, Pillar, LuckCycle, YearlyCycle, Palace } from '@/lib/bazi'
+import { useState, useRef, useEffect, CSSProperties } from 'react'
+import { calculateBazi, ELEMENT_COLORS } from '@/lib/bazi'
+import type { BaziResult, Pillar, LuckCycle, YearlyCycle } from '@/lib/bazi'
 
-// ── GMT offset options ──────────────────────────────────────────────────────
+// ── City database with timezone & longitude ──────────────────────────────────
 
-const GMT_OPTIONS = [
-  { label: 'GMT−11:00', value: -11 },
-  { label: 'GMT−10:00', value: -10 },
-  { label: 'GMT−9:00',  value: -9  },
-  { label: 'GMT−8:00',  value: -8  },
-  { label: 'GMT−7:00',  value: -7  },
-  { label: 'GMT−6:00',  value: -6  },
-  { label: 'GMT−5:00',  value: -5  },
-  { label: 'GMT−4:00',  value: -4  },
-  { label: 'GMT−3:00',  value: -3  },
-  { label: 'GMT−2:00',  value: -2  },
-  { label: 'GMT−1:00',  value: -1  },
-  { label: 'GMT+0:00',  value:  0  },
-  { label: 'GMT+1:00',  value:  1  },
-  { label: 'GMT+2:00',  value:  2  },
-  { label: 'GMT+3:00 (Москва)',   value: 3  },
-  { label: 'GMT+4:00 (Баку)',     value: 4  },
-  { label: 'GMT+5:00 (Ташкент)', value: 5  },
-  { label: 'GMT+6:00',  value:  6  },
-  { label: 'GMT+7:00 (Новосибирск)', value: 7 },
-  { label: 'GMT+8:00 (Пекин)',    value: 8  },
-  { label: 'GMT+9:00',  value:  9  },
-  { label: 'GMT+10:00', value: 10  },
-  { label: 'GMT+11:00', value: 11  },
-  { label: 'GMT+12:00', value: 12  },
-  { label: 'GMT+13:00', value: 13  },
+interface City {
+  name: string
+  nameRu: string
+  country: string
+  gmt: number
+  lon: number
+  lat: number
+}
+
+const CITIES: City[] = [
+  { name: 'Moscow',        nameRu: 'Москва',         country: 'Россия',      gmt: 3,    lon: 37.62,   lat: 55.75 },
+  { name: 'Saint Petersburg', nameRu: 'Санкт-Петербург', country: 'Россия', gmt: 3,    lon: 30.32,   lat: 59.93 },
+  { name: 'Novosibirsk',   nameRu: 'Новосибирск',    country: 'Россия',      gmt: 7,    lon: 82.92,   lat: 54.98 },
+  { name: 'Yekaterinburg', nameRu: 'Екатеринбург',   country: 'Россия',      gmt: 5,    lon: 60.60,   lat: 56.84 },
+  { name: 'Kazan',         nameRu: 'Казань',          country: 'Россия',      gmt: 3,    lon: 49.12,   lat: 55.79 },
+  { name: 'Omsk',          nameRu: 'Омск',            country: 'Россия',      gmt: 6,    lon: 73.37,   lat: 54.99 },
+  { name: 'Samara',        nameRu: 'Самара',          country: 'Россия',      gmt: 4,    lon: 50.15,   lat: 53.20 },
+  { name: 'Rostov-on-Don', nameRu: 'Ростов-на-Дону', country: 'Россия',      gmt: 3,    lon: 39.72,   lat: 47.23 },
+  { name: 'Ufa',           nameRu: 'Уфа',             country: 'Россия',      gmt: 5,    lon: 55.97,   lat: 54.74 },
+  { name: 'Krasnoyarsk',   nameRu: 'Красноярск',      country: 'Россия',      gmt: 7,    lon: 92.87,   lat: 56.01 },
+  { name: 'Perm',          nameRu: 'Пермь',           country: 'Россия',      gmt: 5,    lon: 56.24,   lat: 58.01 },
+  { name: 'Voronezh',      nameRu: 'Воронеж',         country: 'Россия',      gmt: 3,    lon: 39.20,   lat: 51.67 },
+  { name: 'Volgograd',     nameRu: 'Волгоград',       country: 'Россия',      gmt: 3,    lon: 44.52,   lat: 48.71 },
+  { name: 'Krasnodar',     nameRu: 'Краснодар',       country: 'Россия',      gmt: 3,    lon: 38.97,   lat: 45.04 },
+  { name: 'Saratov',       nameRu: 'Саратов',         country: 'Россия',      gmt: 3,    lon: 46.03,   lat: 51.54 },
+  { name: 'Tyumen',        nameRu: 'Тюмень',          country: 'Россия',      gmt: 5,    lon: 68.97,   lat: 57.15 },
+  { name: 'Tolyatti',      nameRu: 'Тольятти',        country: 'Россия',      gmt: 4,    lon: 49.41,   lat: 53.51 },
+  { name: 'Izhevsk',       nameRu: 'Ижевск',          country: 'Россия',      gmt: 4,    lon: 53.21,   lat: 56.85 },
+  { name: 'Barnaul',       nameRu: 'Барнаул',         country: 'Россия',      gmt: 7,    lon: 83.78,   lat: 53.34 },
+  { name: 'Vladivostok',   nameRu: 'Владивосток',     country: 'Россия',      gmt: 10,   lon: 131.87,  lat: 43.12 },
+  { name: 'Irkutsk',       nameRu: 'Иркутск',         country: 'Россия',      gmt: 8,    lon: 104.28,  lat: 52.29 },
+  { name: 'Khabarovsk',    nameRu: 'Хабаровск',       country: 'Россия',      gmt: 10,   lon: 135.07,  lat: 48.48 },
+  { name: 'Ulyanovsk',     nameRu: 'Ульяновск',       country: 'Россия',      gmt: 4,    lon: 48.40,   lat: 54.33 },
+  { name: 'Yaroslavl',     nameRu: 'Ярославль',       country: 'Россия',      gmt: 3,    lon: 39.87,   lat: 57.63 },
+  { name: 'Kemerovo',      nameRu: 'Кемерово',        country: 'Россия',      gmt: 7,    lon: 86.09,   lat: 55.35 },
+  { name: 'Tomsk',         nameRu: 'Томск',            country: 'Россия',      gmt: 7,    lon: 84.95,   lat: 56.50 },
+  { name: 'Astrakhan',     nameRu: 'Астрахань',       country: 'Россия',      gmt: 3,    lon: 48.04,   lat: 46.34 },
+  { name: 'Ryazan',        nameRu: 'Рязань',           country: 'Россия',      gmt: 3,    lon: 39.70,   lat: 54.63 },
+  { name: 'Naberezhnye Chelny', nameRu: 'Набережные Челны', country: 'Россия', gmt: 3, lon: 52.43,   lat: 55.74 },
+  { name: 'Penza',         nameRu: 'Пенза',            country: 'Россия',      gmt: 3,    lon: 45.00,   lat: 53.20 },
+  { name: 'Lipetsk',       nameRu: 'Липецк',           country: 'Россия',      gmt: 3,    lon: 39.60,   lat: 52.61 },
+  { name: 'Kirov',         nameRu: 'Киров',            country: 'Россия',      gmt: 3,    lon: 49.67,   lat: 58.60 },
+  { name: 'Cheboksary',    nameRu: 'Чебоксары',        country: 'Россия',      gmt: 3,    lon: 47.25,   lat: 56.15 },
+  { name: 'Chelyabinsk',   nameRu: 'Челябинск',        country: 'Россия',      gmt: 5,    lon: 61.40,   lat: 55.16 },
+  { name: 'Kyiv',          nameRu: 'Киев',             country: 'Украина',     gmt: 2,    lon: 30.52,   lat: 50.45 },
+  { name: 'Kharkiv',       nameRu: 'Харьков',          country: 'Украина',     gmt: 2,    lon: 36.25,   lat: 49.99 },
+  { name: 'Odessa',        nameRu: 'Одесса',           country: 'Украина',     gmt: 2,    lon: 30.73,   lat: 46.48 },
+  { name: 'Dnipro',        nameRu: 'Днепр',            country: 'Украина',     gmt: 2,    lon: 35.05,   lat: 48.46 },
+  { name: 'Minsk',         nameRu: 'Минск',            country: 'Беларусь',    gmt: 3,    lon: 27.57,   lat: 53.90 },
+  { name: 'Almaty',        nameRu: 'Алматы',           country: 'Казахстан',   gmt: 5,    lon: 76.95,   lat: 43.25 },
+  { name: 'Nur-Sultan',    nameRu: 'Астана',           country: 'Казахстан',   gmt: 5,    lon: 71.43,   lat: 51.18 },
+  { name: 'Tashkent',      nameRu: 'Ташкент',          country: 'Узбекистан',  gmt: 5,    lon: 69.27,   lat: 41.30 },
+  { name: 'Bishkek',       nameRu: 'Бишкек',           country: 'Кыргызстан',  gmt: 6,    lon: 74.57,   lat: 42.87 },
+  { name: 'Baku',          nameRu: 'Баку',             country: 'Азербайджан', gmt: 4,    lon: 49.87,   lat: 40.41 },
+  { name: 'Tbilisi',       nameRu: 'Тбилиси',          country: 'Грузия',      gmt: 4,    lon: 44.83,   lat: 41.69 },
+  { name: 'Yerevan',       nameRu: 'Ереван',           country: 'Армения',     gmt: 4,    lon: 44.50,   lat: 40.18 },
+  { name: 'Beijing',       nameRu: 'Пекин',            country: 'Китай',       gmt: 8,    lon: 116.40,  lat: 39.90 },
+  { name: 'Shanghai',      nameRu: 'Шанхай',           country: 'Китай',       gmt: 8,    lon: 121.47,  lat: 31.23 },
+  { name: 'Guangzhou',     nameRu: 'Гуанчжоу',         country: 'Китай',       gmt: 8,    lon: 113.26,  lat: 23.13 },
+  { name: 'Hong Kong',     nameRu: 'Гонконг',          country: 'Китай',       gmt: 8,    lon: 114.16,  lat: 22.31 },
+  { name: 'Tokyo',         nameRu: 'Токио',            country: 'Япония',      gmt: 9,    lon: 139.69,  lat: 35.69 },
+  { name: 'Seoul',         nameRu: 'Сеул',             country: 'Корея',       gmt: 9,    lon: 126.97,  lat: 37.57 },
+  { name: 'Singapore',     nameRu: 'Сингапур',         country: 'Сингапур',    gmt: 8,    lon: 103.82,  lat: 1.35  },
+  { name: 'Bangkok',       nameRu: 'Бангкок',          country: 'Таиланд',     gmt: 7,    lon: 100.52,  lat: 13.75 },
+  { name: 'Dubai',         nameRu: 'Дубай',            country: 'ОАЭ',         gmt: 4,    lon: 55.30,   lat: 25.20 },
+  { name: 'Istanbul',      nameRu: 'Стамбул',          country: 'Турция',      gmt: 3,    lon: 28.97,   lat: 41.01 },
+  { name: 'Berlin',        nameRu: 'Берлин',           country: 'Германия',    gmt: 1,    lon: 13.40,   lat: 52.52 },
+  { name: 'Paris',         nameRu: 'Париж',            country: 'Франция',     gmt: 1,    lon: 2.35,    lat: 48.85 },
+  { name: 'London',        nameRu: 'Лондон',           country: 'Великобритания', gmt: 0, lon: -0.13,   lat: 51.51 },
+  { name: 'Madrid',        nameRu: 'Мадрид',           country: 'Испания',     gmt: 1,    lon: -3.70,   lat: 40.42 },
+  { name: 'Rome',          nameRu: 'Рим',              country: 'Италия',      gmt: 1,    lon: 12.48,   lat: 41.90 },
+  { name: 'Warsaw',        nameRu: 'Варшава',          country: 'Польша',      gmt: 1,    lon: 21.01,   lat: 52.23 },
+  { name: 'Prague',        nameRu: 'Прага',            country: 'Чехия',       gmt: 1,    lon: 14.42,   lat: 50.09 },
+  { name: 'Vienna',        nameRu: 'Вена',             country: 'Австрия',     gmt: 1,    lon: 16.37,   lat: 48.21 },
+  { name: 'New York',      nameRu: 'Нью-Йорк',         country: 'США',         gmt: -5,   lon: -74.01,  lat: 40.71 },
+  { name: 'Los Angeles',   nameRu: 'Лос-Анджелес',     country: 'США',         gmt: -8,   lon: -118.24, lat: 34.05 },
+  { name: 'Chicago',       nameRu: 'Чикаго',           country: 'США',         gmt: -6,   lon: -87.63,  lat: 41.85 },
+  { name: 'Toronto',       nameRu: 'Торонто',          country: 'Канада',      gmt: -5,   lon: -79.38,  lat: 43.65 },
+  { name: 'Sydney',        nameRu: 'Сидней',           country: 'Австралия',   gmt: 10,   lon: 151.21,  lat: -33.87 },
+  { name: 'Tel Aviv',      nameRu: 'Тель-Авив',        country: 'Израиль',     gmt: 2,    lon: 34.78,   lat: 32.08 },
+  { name: 'Riga',          nameRu: 'Рига',             country: 'Латвия',      gmt: 2,    lon: 24.11,   lat: 56.95 },
+  { name: 'Tallinn',       nameRu: 'Таллин',           country: 'Эстония',     gmt: 2,    lon: 24.75,   lat: 59.44 },
+  { name: 'Vilnius',       nameRu: 'Вильнюс',          country: 'Литва',       gmt: 2,    lon: 25.28,   lat: 54.69 },
+  { name: 'Helsinki',      nameRu: 'Хельсинки',        country: 'Финляндия',   gmt: 2,    lon: 24.94,   lat: 60.17 },
+  { name: 'Stockholm',     nameRu: 'Стокгольм',        country: 'Швеция',      gmt: 1,    lon: 18.07,   lat: 59.33 },
+  { name: 'Amsterdam',     nameRu: 'Амстердам',        country: 'Нидерланды',  gmt: 1,    lon: 4.90,    lat: 52.37 },
+  { name: 'Brussels',      nameRu: 'Брюссель',         country: 'Бельгия',     gmt: 1,    lon: 4.35,    lat: 50.85 },
+  { name: 'Zurich',        nameRu: 'Цюрих',            country: 'Швейцария',   gmt: 1,    lon: 8.54,    lat: 47.38 },
+  { name: 'Bucharest',     nameRu: 'Бухарест',         country: 'Румыния',     gmt: 2,    lon: 26.10,   lat: 44.43 },
+  { name: 'Sofia',         nameRu: 'София',            country: 'Болгария',    gmt: 2,    lon: 23.32,   lat: 42.70 },
+  { name: 'Athens',        nameRu: 'Афины',            country: 'Греция',      gmt: 2,    lon: 23.73,   lat: 37.98 },
+  { name: 'Tehran',        nameRu: 'Тегеран',          country: 'Иран',        gmt: 3.5,  lon: 51.42,   lat: 35.69 },
+  { name: 'Karachi',       nameRu: 'Карачи',           country: 'Пакистан',    gmt: 5,    lon: 67.01,   lat: 24.86 },
+  { name: 'Mumbai',        nameRu: 'Мумбаи',           country: 'Индия',       gmt: 5.5,  lon: 72.88,   lat: 19.08 },
+  { name: 'Delhi',         nameRu: 'Дели',             country: 'Индия',       gmt: 5.5,  lon: 77.21,   lat: 28.66 },
+  { name: 'Colombo',       nameRu: 'Коломбо',          country: 'Шри-Ланка',   gmt: 5.5,  lon: 79.86,   lat: 6.93  },
+  { name: 'Dhaka',         nameRu: 'Дакка',            country: 'Бангладеш',   gmt: 6,    lon: 90.41,   lat: 23.73 },
+  { name: 'Kuala Lumpur',  nameRu: 'Куала-Лумпур',     country: 'Малайзия',    gmt: 8,    lon: 101.69,  lat: 3.14  },
+  { name: 'Jakarta',       nameRu: 'Джакарта',         country: 'Индонезия',   gmt: 7,    lon: 106.84,  lat: -6.21 },
+  { name: 'Manila',        nameRu: 'Манила',           country: 'Филиппины',   gmt: 8,    lon: 120.98,  lat: 14.60 },
+  { name: 'Taipei',        nameRu: 'Тайбэй',           country: 'Тайвань',     gmt: 8,    lon: 121.56,  lat: 25.04 },
+  { name: 'Hanoi',         nameRu: 'Ханой',            country: 'Вьетнам',     gmt: 7,    lon: 105.85,  lat: 21.03 },
+  { name: 'Ulaanbaatar',   nameRu: 'Улан-Батор',       country: 'Монголия',    gmt: 8,    lon: 106.92,  lat: 47.91 },
 ]
+
+function searchCities(query: string): City[] {
+  if (!query || query.length < 1) return []
+  const q = query.toLowerCase()
+  return CITIES.filter(c =>
+    c.nameRu.toLowerCase().includes(q) ||
+    c.name.toLowerCase().includes(q) ||
+    c.country.toLowerCase().includes(q)
+  ).slice(0, 8)
+}
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 
@@ -752,13 +839,12 @@ function YearlyCyclesTable({ cycles }: { cycles: YearlyCycle[] }) {
 
 // ── View switcher ────────────────────────────────────────────────────────────
 
-type ViewMode = 'bazi' | 'palaces' | 'square'
+type ViewMode = 'bazi' | 'square'
 
 function ViewSwitcher({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
   const opts: { value: ViewMode; label: string }[] = [
-    { value: 'bazi',    label: 'Карта Бацзы' },
-    { value: 'palaces', label: '12 дворцов'  },
-    { value: 'square',  label: 'Карта ЦМ'   },
+    { value: 'bazi',   label: 'Карта Бацзы' },
+    { value: 'square', label: 'Карта ЦМ'   },
   ]
   return (
     <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
@@ -778,207 +864,283 @@ function ViewSwitcher({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMo
   )
 }
 
-// ── 12 Palaces view ───────────────────────────────────────────────────────────
+// ── Qi Men Dun Jia view (奇門遁甲) ─────────────────────────────────────────────
+// 9 palaces (Lo Shu square) layout with current year/month pillars
+// Lo Shu order: SE=4, S=9, SW=2 / E=3, Center=5, W=7 / NE=8, N=1, NW=6
 
-function PalacesView({ palaces, result }: { palaces: Palace[]; result: BaziResult }) {
-  const qiChip = (phase: string) => {
-    const danger = ['Болезнь','Смерть','Могила','Пустота'].includes(phase)
-    const good   = ['Расцвет','Власть','Рождение'].includes(phase)
-    return (
-      <span style={{
-        fontSize: '.68rem', fontWeight: 500, padding: '.1rem .35rem', borderRadius: '2px',
-        color: good ? '#2e7d32' : danger ? '#c62828' : 'var(--muted)',
-        background: good ? '#e8f5e9' : danger ? '#fde8e8' : 'var(--off)',
-        border: `1px solid ${good ? '#a5d6a7' : danger ? '#ef9a9a' : 'var(--line)'}`,
-        display: 'inline-block', marginRight: '.2rem', marginBottom: '.15rem',
-      }}>{phase}</span>
-    )
-  }
+// 8 Gates (八門) of Qi Men
+const QM_GATES = ['休','生','傷','杜','景','死','驚','開']
+const QM_GATES_RU = ['Покой','Жизнь','Рана','Преграда','Пейзаж','Смерть','Страх','Открытие']
 
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--white)', border: '1px solid var(--line)' }}>
-        <thead>
-          <tr>
-            <th style={{ padding: '.7rem 1rem', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', background: 'var(--off)', borderBottom: '1px solid var(--line)', textAlign: 'left', width: '22%' }}>
-              12 дворцов
-            </th>
-            <th style={{ padding: '.7rem 1rem', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', background: 'var(--off)', borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)', textAlign: 'left' }}>
-              Ангелы удачи и Демоны неудачи
-            </th>
-            <th style={{ padding: '.7rem 1rem', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', background: 'var(--off)', borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)', textAlign: 'left', width: '18%' }}>
-              Фаза Ци
-            </th>
-            <th style={{ padding: '.7rem 1rem', fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', background: 'var(--off)', borderBottom: '1px solid var(--line)', borderLeft: '1px solid var(--line)', textAlign: 'center', width: '12%' }}>
-              Ветвь
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {palaces.map((palace, i) => {
-            const isEven = i % 2 === 1
-            const el = palace.pillar.branchElement
-            return (
-              <tr key={palace.index}>
-                <td style={{ padding: '.8rem 1rem', borderTop: '1px solid var(--line)', background: isEven ? 'var(--off)' : 'var(--white)', verticalAlign: 'top' }}>
-                  <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: '.9rem' }}>{palace.name}</span>
-                </td>
-                <td style={{ padding: '.8rem 1rem', borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', background: isEven ? 'var(--off)' : 'var(--white)', verticalAlign: 'top' }}>
-                  {palace.stars.length > 0
-                    ? palace.stars.map((star, j) => (
-                        <div key={j} style={{ fontSize: '.85rem', color: 'var(--muted)', lineHeight: 1.6 }}>
-                          {star.startsWith('Демон') ? (
-                            <span style={{ color: '#c62828' }}>{star}</span>
-                          ) : (
-                            <span style={{ color: '#1565c0' }}>{star}</span>
-                          )}
-                        </div>
-                      ))
-                    : <span style={{ fontSize: '.8rem', color: 'var(--faint)' }}>—</span>
-                  }
-                </td>
-                <td style={{ padding: '.8rem 1rem', borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', background: isEven ? 'var(--off)' : 'var(--white)', verticalAlign: 'top' }}>
-                  {palace.qiPhases.map((ph, j) => (
-                    <div key={j} style={{ marginBottom: '.1rem' }}>{qiChip(ph)}</div>
-                  ))}
-                </td>
-                <td style={{ padding: '.8rem .6rem', borderTop: '1px solid var(--line)', borderLeft: '1px solid var(--line)', background: isEven ? 'var(--off)' : 'var(--white)', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <span style={{ fontFamily: 'var(--serif)', fontSize: '1.6rem', fontWeight: 700, color: ELEMENT_COLORS[el]?.text ?? '#333', display: 'block', lineHeight: 1 }}>{palace.pillar.branch}</span>
-                  <span style={{ fontSize: '.65rem', color: ELEMENT_COLORS[el]?.text ?? '#555' }}>{palace.pillar.branchNameRu}</span>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
+// 9 Stars (九星) of Qi Men
+const QM_STARS = ['天蓬','天芮','天冲','天辅','天禽','天心','天柱','天任','天英']
+const QM_STARS_RU = ['Пэн','Жуй','Чун','Фу','Цинь','Синь','Чжу','Жэнь','Ин']
+
+// 8 Spirits/Gods (八神)
+const QM_SPIRITS = ['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天']
+const QM_SPIRITS_RU = ['Страж','Змея','Иньское','Союз','Тигр','Воин','Земля','Небо']
+
+// Lo Shu palace positions (row, col) for palaces 1-9
+// Layout: row 0 = top (S side), row 2 = bottom (N side) per classical orientation
+// Displayed: top-left=SE(4), top-center=S(9), top-right=SW(2)
+//            mid-left=E(3),  center=5,        mid-right=W(7)
+//            bot-left=NE(8), bot-center=N(1), bot-right=NW(6)
+const LO_SHU_GRID = [
+  [4, 9, 2],
+  [3, 5, 7],
+  [8, 1, 6],
+]
+
+const PALACE_NAMES_RU: Record<number, string> = {
+  1: 'С (坎)', 2: 'ЮЗ (坤)', 3: 'В (震)',
+  4: 'ЮВ (巽)', 5: 'Центр (中)', 6: 'СЗ (乾)',
+  7: 'З (兌)', 8: 'СВ (艮)', 9: 'Ю (離)',
 }
 
-// ── Square (ЦМ) view — 3×3 grid ──────────────────────────────────────────────
-// Layout: palace index arranged like a Lo Shu square
-// Positions: SE(3) S(2) SW(1)  / E(4) Center W(0) / NE(5) N(11) NW(6)  etc.
-// We show simplified 3×3 with named houses
+function getQmPalaceData(result: BaziResult) {
+  const currentYear = new Date().getFullYear()
+  const yearStemIdx = result.year.stemIndex
+  const monthStemIdx = result.month.stemIndex
+  const dayStemIdx = result.day.stemIndex
 
-function SquareView({ palaces, result }: { palaces: Palace[]; result: BaziResult }) {
-  // 3×3 grid positions with palace indices (0-based)
-  // Based on the reference screenshot layout: month column = right, hour = left
-  // We map palaces 0-11 into the 12-cell ring around the center
-  // Center cell = the 4 pillars mini-table
+  // Gate assignment: rotate gates based on day stem (simplified)
+  const gateOffset = dayStemIdx % 8
+  // Star assignment: rotate stars based on year stem
+  const starOffset = yearStemIdx % 9
+  // Spirit assignment: rotate spirits based on month stem
+  const spiritOffset = monthStemIdx % 8
 
-  // 12 cells arranged as: top row (3 cells), middle row (center + 2 sides), bottom row (3 cells)
-  // Ring order (clockwise from top-left): 11,10,9 / 0, center, 8 / 1,2,3,4,5,6,7
-  // For 3×3 we show 8 outer + 1 center
-  const ringLayout: (number | 'center')[][] = [
-    [10, 11, 0],
-    [9,  'center', 1],
-    [8,  7,  2],
-    // bottom row continues outside 3×3 in reference, but we'll use 4×3
-  ]
+  const palaces: Record<number, {
+    palace: number
+    gate: string; gateRu: string
+    star: string; starRu: string
+    spirit: string; spiritRu: string
+    stem: string; stemEl: string
+    branch: string; branchEl: string
+  }> = {}
 
-  // Actually use 4×3 to fit all 12
-  const gridLayout: (number | 'center' | null)[][] = [
-    [11, 10, 9,  8 ],
-    [0,  'center', 'center', 7 ],
-    [1,  'center', 'center', 6 ],
-    [2,  3,  4,  5 ],
-  ]
-
-  const CellContent = ({ palace }: { palace: Palace }) => {
-    const el = palace.pillar.branchElement
-    return (
-      <div style={{ padding: '.4rem .3rem', height: '100%', display: 'flex', flexDirection: 'column', gap: '.2rem', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontSize: '.6rem', fontWeight: 600, color: 'var(--gold)', textAlign: 'center', lineHeight: 1.2 }}>{palace.name}</div>
-        <div style={{ display: 'flex', gap: '.2rem', alignItems: 'baseline' }}>
-          <span style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', fontWeight: 700, color: ELEMENT_COLORS[palace.pillar.stemElement]?.text ?? '#333', lineHeight: 1 }}>{palace.pillar.stem}</span>
-          <span style={{ fontFamily: 'var(--serif)', fontSize: '1.3rem', fontWeight: 700, color: ELEMENT_COLORS[el]?.text ?? '#555', lineHeight: 1 }}>{palace.pillar.branch}</span>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.1rem', justifyContent: 'center' }}>
-          {palace.qiPhases.slice(0,2).map((ph, j) => {
-            const danger = ['Болезнь','Смерть','Могила','Пустота'].includes(ph)
-            const good   = ['Расцвет','Власть','Рождение'].includes(ph)
-            return (
-              <span key={j} style={{ fontSize: '.58rem', padding: '.05rem .25rem', borderRadius: '2px', color: good ? '#2e7d32' : danger ? '#c62828' : 'var(--muted)', background: good ? '#e8f5e9' : danger ? '#fde8e8' : 'var(--off)' }}>
-                {ph}
-              </span>
-            )
-          })}
-        </div>
-        {palace.stars.slice(0,2).map((star, j) => (
-          <div key={j} style={{ fontSize: '.58rem', color: star.startsWith('Демон') ? '#c62828' : '#1565c0', textAlign: 'center', lineHeight: 1.2 }}>{star}</div>
-        ))}
-      </div>
-    )
+  for (let i = 1; i <= 9; i++) {
+    if (i === 5) {
+      palaces[5] = {
+        palace: 5,
+        gate: '—', gateRu: '—',
+        star: QM_STARS[4], starRu: QM_STARS_RU[4],
+        spirit: '—', spiritRu: '—',
+        stem: result.day.stem, stemEl: result.day.stemElement,
+        branch: result.month.branch, branchEl: result.month.branchElement,
+      }
+      continue
+    }
+    const gIdx = ((i - 1 + gateOffset) % 8)
+    const sIdx = ((i - 1 + starOffset) % 9)
+    const spIdx = ((i - 1 + spiritOffset) % 8)
+    palaces[i] = {
+      palace: i,
+      gate: QM_GATES[gIdx], gateRu: QM_GATES_RU[gIdx],
+      star: QM_STARS[sIdx], starRu: QM_STARS_RU[sIdx],
+      spirit: QM_SPIRITS[spIdx], spiritRu: QM_SPIRITS_RU[spIdx],
+      stem: result.year.stem, stemEl: result.year.stemElement,
+      branch: result.year.branch, branchEl: result.year.branchElement,
+    }
   }
+  return palaces
+}
 
-  const CenterCell = () => {
-    const pillars = [
-      { label: 'Ч', p: result.hour },
-      { label: 'Д', p: result.day },
-      { label: 'М', p: result.month },
-      { label: 'Г', p: result.year },
-    ]
-    return (
-      <div style={{ padding: '.5rem', display: 'flex', flexDirection: 'column', gap: '.3rem', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <div style={{ fontSize: '.6rem', color: 'var(--muted)', fontWeight: 600, letterSpacing: '.06em', marginBottom: '.2rem' }}>Четыре столпа</div>
-        <div style={{ display: 'flex', gap: '.4rem' }}>
-          {pillars.map(({ label, p }) => p && (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '.55rem', color: 'var(--faint)' }}>{label}</div>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', fontWeight: 700, color: ELEMENT_COLORS[p.stemElement]?.text ?? '#333', lineHeight: 1 }}>{p.stem}</div>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '1rem', fontWeight: 700, color: ELEMENT_COLORS[p.branchElement]?.text ?? '#555', lineHeight: 1 }}>{p.branch}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ fontSize: '.62rem', color: 'var(--muted)', textAlign: 'center', marginTop: '.2rem' }}>
-          {result.dayMaster.nameRu} · {result.dayMaster.element} · {result.dayMaster.polarity}
-        </div>
-      </div>
-    )
-  }
+function SquareView({ result }: { result: BaziResult }) {
+  const palaces = getQmPalaceData(result)
 
-  const cellStyle: CSSProperties = {
+  const cellBase: CSSProperties = {
     border: '1px solid var(--line)',
-    minHeight: '130px',
-    verticalAlign: 'middle' as const,
+    verticalAlign: 'top',
+    width: '33.33%',
   }
 
-  const centerCells = new Set<string>()
+  const PalaceCell = ({ num }: { num: number }) => {
+    const p = palaces[num]
+    const isCenter = num === 5
+    const isDeath = p.gateRu === 'Смерть'
+    const isLife = p.gateRu === 'Жизнь' || p.gateRu === 'Открытие'
+
+    return (
+      <td style={{
+        ...cellBase,
+        background: isCenter ? 'var(--off)' : 'var(--white)',
+        padding: '.8rem .6rem',
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', alignItems: 'center', minHeight: '140px', justifyContent: 'center' }}>
+          {/* Palace number & direction */}
+          <div style={{ fontSize: '.65rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '.06em', textAlign: 'center' }}>
+            {PALACE_NAMES_RU[num]}
+          </div>
+
+          {/* Heavenly stem + Branch from pillars */}
+          <div style={{ display: 'flex', gap: '.2rem', alignItems: 'baseline', justifyContent: 'center' }}>
+            <span style={{ fontFamily: 'var(--serif)', fontSize: '1.8rem', fontWeight: 700, lineHeight: 1, color: ELEMENT_COLORS[p.stemEl]?.text ?? '#333' }}>
+              {p.stem}
+            </span>
+            <span style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', fontWeight: 700, lineHeight: 1, color: ELEMENT_COLORS[p.branchEl]?.text ?? '#555' }}>
+              {p.branch}
+            </span>
+          </div>
+
+          {/* Gate */}
+          {!isCenter && (
+            <div style={{
+              fontSize: '.72rem', fontWeight: 600, padding: '.1rem .5rem',
+              color: isDeath ? '#c62828' : isLife ? '#2e7d32' : 'var(--ink)',
+              background: isDeath ? '#fde8e8' : isLife ? '#e8f5e9' : 'var(--off)',
+              border: `1px solid ${isDeath ? '#ef9a9a' : isLife ? '#a5d6a7' : 'var(--line)'}`,
+              display: 'flex', alignItems: 'center', gap: '.25rem',
+            }}>
+              <span style={{ fontFamily: 'var(--serif)', fontSize: '1rem' }}>{p.gate}</span>
+              <span>{p.gateRu}</span>
+            </div>
+          )}
+
+          {/* Star */}
+          <div style={{ fontSize: '.68rem', color: '#1565c0', display: 'flex', alignItems: 'center', gap: '.2rem' }}>
+            <span style={{ fontFamily: 'var(--serif)', fontSize: '.85rem' }}>{p.star}</span>
+            <span style={{ color: 'var(--muted)' }}>{p.starRu}</span>
+          </div>
+
+          {/* Spirit */}
+          {!isCenter && (
+            <div style={{ fontSize: '.65rem', color: 'var(--muted)' }}>{p.spiritRu}</div>
+          )}
+
+          {isCenter && (
+            <div style={{ fontSize: '.7rem', color: 'var(--muted)', textAlign: 'center', lineHeight: 1.5, marginTop: '.2rem' }}>
+              {result.dayMaster.nameRu}<br />
+              {result.dayMaster.element} · {result.dayMaster.polarity}
+            </div>
+          )}
+        </div>
+      </td>
+    )
+  }
 
   return (
     <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-      <table style={{ borderCollapse: 'collapse', width: '100%', background: 'var(--white)', border: '1px solid var(--line)', minWidth: '500px' }}>
+      <table style={{ borderCollapse: 'collapse', width: '100%', background: 'var(--white)', border: '1px solid var(--line)', minWidth: '480px', tableLayout: 'fixed' }}>
         <tbody>
-          {gridLayout.map((row, ri) => (
+          {LO_SHU_GRID.map((row, ri) => (
             <tr key={ri}>
-              {row.map((cell, ci) => {
-                if (cell === 'center') {
-                  const key = `${ri}-${ci}`
-                  if (centerCells.has('rendered')) return null
-                  // Only render center once with rowspan/colspan
-                  if (!centerCells.has('rendered')) {
-                    centerCells.add('rendered')
-                    return (
-                      <td key={key} rowSpan={2} colSpan={2} style={{ ...cellStyle, background: 'var(--off)', minHeight: '260px' }}>
-                        <CenterCell />
-                      </td>
-                    )
-                  }
-                  return null
-                }
-                if (cell === null) return null
-                const palace = palaces[cell as number]
-                if (!palace) return <td key={ci} style={cellStyle} />
-                return (
-                  <td key={ci} style={{ ...cellStyle, background: 'var(--white)' }}>
-                    <CellContent palace={palace} />
-                  </td>
-                )
-              })}
+              {row.map((num) => (
+                <PalaceCell key={num} num={num} />
+              ))}
             </tr>
           ))}
         </tbody>
       </table>
+      <p style={{ fontSize: '.78rem', color: 'var(--faint)', marginTop: '1rem' }}>
+        Карта Ци Мен Дун Цзя: 9 дворцов Ло Шу. Врата (門), Звёзды (星) и Духи (神) рассчитаны от столпов дня, года и месяца. Для профессионального расчёта ЦМ используйте специализированный инструмент.
+      </p>
+    </div>
+  )
+}
+
+// ── City search autocomplete ──────────────────────────────────────────────────
+
+function CitySearch({ onSelect }: {
+  onSelect: (city: City) => void
+}) {
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<City[]>([])
+  const [selectedCity, setSelectedCity] = useState<City | null>(null)
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const handleInput = (val: string) => {
+    setQuery(val)
+    setSelectedCity(null)
+    if (val.length >= 1) {
+      const results = searchCities(val)
+      setSuggestions(results)
+      setOpen(results.length > 0)
+    } else {
+      setSuggestions([])
+      setOpen(false)
+    }
+  }
+
+  const handleSelect = (city: City) => {
+    setSelectedCity(city)
+    setQuery(`${city.nameRu}, ${city.country}`)
+    setSuggestions([])
+    setOpen(false)
+    onSelect(city)
+  }
+
+  const gmtLabel = selectedCity
+    ? `GMT${selectedCity.gmt >= 0 ? '+' : ''}${selectedCity.gmt}:00`
+    : ''
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label style={s.fieldLabel} htmlFor="bazi-city">Место рождения</label>
+      <div style={{ position: 'relative' }}>
+        <input
+          id="bazi-city"
+          type="text"
+          value={query}
+          placeholder="Начните вводить город..."
+          onChange={(e) => handleInput(e.target.value)}
+          onFocus={() => { if (suggestions.length > 0) setOpen(true) }}
+          style={s.input}
+          autoComplete="off"
+        />
+        {selectedCity && (
+          <span style={{
+            position: 'absolute', right: '.7rem', top: '50%', transform: 'translateY(-50%)',
+            fontSize: '.72rem', color: 'var(--gold)', fontWeight: 600,
+            background: 'var(--off)', padding: '.1rem .4rem',
+            pointerEvents: 'none',
+          }}>
+            {gmtLabel}
+          </span>
+        )}
+      </div>
+      {!selectedCity && query.length === 0 && (
+        <span style={s.fieldNote}>часовой пояс и долгота подставятся автоматически</span>
+      )}
+      {open && suggestions.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--white)', border: '1px solid var(--line)',
+          borderTop: 'none', maxHeight: '260px', overflowY: 'auto',
+          boxShadow: '0 4px 16px rgba(0,0,0,.1)',
+        }}>
+          {suggestions.map((city) => (
+            <div
+              key={`${city.name}-${city.country}`}
+              onMouseDown={() => handleSelect(city)}
+              style={{
+                padding: '.7rem 1rem', cursor: 'pointer', fontSize: '.88rem',
+                borderBottom: '1px solid var(--line)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--off)' }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'var(--white)' }}
+            >
+              <span>
+                <strong style={{ color: 'var(--ink)' }}>{city.nameRu}</strong>
+                <span style={{ color: 'var(--muted)', marginLeft: '.4rem' }}>{city.country}</span>
+              </span>
+              <span style={{ fontSize: '.72rem', color: 'var(--gold)', fontWeight: 600 }}>
+                GMT{city.gmt >= 0 ? '+' : ''}{city.gmt}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -994,9 +1156,13 @@ export default function BaziCalculator() {
   const [longitude,     setLongitude]     = useState(37.62)
   const [useSolarTime,  setUseSolarTime]  = useState(false)
   const [dayChangeAt23, setDayChangeAt23] = useState(false)
-  const [birthPlace,    setBirthPlace]    = useState('')
   const [result,        setResult]        = useState<BaziResult | null>(null)
   const [viewMode,      setViewMode]      = useState<ViewMode>('bazi')
+
+  const handleCitySelect = (city: City) => {
+    setGmtOffset(city.gmt)
+    setLongitude(city.lon)
+  }
 
   const handleCalculate = () => {
     if (!dateVal) return
@@ -1014,10 +1180,9 @@ export default function BaziCalculator() {
       minute = parseInt(minuteStr, 10) || 0
     }
 
-    // Apply "day change at 23:00" option
     let calcHour = hour
     if (dayChangeAt23 && calcHour !== null && calcHour === 23) {
-      calcHour = 23 // handled inside calculateBazi via jdn + 1
+      calcHour = 23
     }
 
     setResult(calculateBazi(
@@ -1077,36 +1242,8 @@ export default function BaziCalculator() {
             <span style={s.fieldNote}>если не знаете — поставьте галочку ниже</span>
           </div>
 
-          <div style={s.fieldGroup}>
-            <label style={s.fieldLabel} htmlFor="bazi-gmt">Часовой пояс</label>
-            <select
-              id="bazi-gmt"
-              value={gmtOffset}
-              onChange={(e) => setGmtOffset(Number(e.target.value))}
-              style={s.select}
-            >
-              {GMT_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={s.fieldGroup}>
-            <label style={s.fieldLabel} htmlFor="bazi-place">Место рождения</label>
-            <input
-              id="bazi-place" type="text" value={birthPlace}
-              placeholder="Город рождения"
-              onChange={(e) => setBirthPlace(e.target.value)} style={s.input}
-            />
-          </div>
-
-          <div style={s.fieldGroup}>
-            <label style={s.fieldLabel} htmlFor="bazi-lon">Долгота (для ист. времени)</label>
-            <input
-              id="bazi-lon" type="number" value={longitude} step="0.01" min="-180" max="180"
-              onChange={(e) => setLongitude(parseFloat(e.target.value) || 0)} style={s.input}
-            />
-            <span style={s.fieldNote}>градусы E/W (восток = +)</span>
+          <div style={{ ...s.fieldGroup, position: 'relative' as const }}>
+            <CitySearch onSelect={handleCitySelect} />
           </div>
 
           <div style={s.fieldGroup}>
@@ -1142,12 +1279,17 @@ export default function BaziCalculator() {
           </label>
           <label style={s.checkLabel}>
             <input type="checkbox" checked={useSolarTime} onChange={e => setUseSolarTime(e.target.checked)} />
-            Истинное солнечное время (коррекция по долготе)
+            Истинное солнечное время
           </label>
           <label style={s.checkLabel}>
             <input type="checkbox" checked={dayChangeAt23} onChange={e => setDayChangeAt23(e.target.checked)} />
             Смена суток в 23:00 (子時)
           </label>
+          <div style={{ fontSize: '.78rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+            <span>GMT{gmtOffset >= 0 ? '+' : ''}{gmtOffset}</span>
+            <span>·</span>
+            <span>Долгота {longitude > 0 ? '+' : ''}{longitude.toFixed(2)}°</span>
+          </div>
         </div>
 
         {/* ── Results ── */}
@@ -1209,19 +1351,11 @@ export default function BaziCalculator() {
               </>
             )}
 
-            {/* ── 12 дворцов ── */}
-            {viewMode === 'palaces' && (
-              <>
-                <SectionHeader title="12 дворцов (十二宮)" />
-                <PalacesView palaces={result.palaces} result={result} />
-              </>
-            )}
-
             {/* ── Карта ЦМ ── */}
             {viewMode === 'square' && (
               <>
-                <SectionHeader title="Карта ЦМ (方位圖)" />
-                <SquareView palaces={result.palaces} result={result} />
+                <SectionHeader title="Карта ЦМ (奇門遁甲)" />
+                <SquareView result={result} />
               </>
             )}
 
