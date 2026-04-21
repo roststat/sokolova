@@ -1159,6 +1159,7 @@ function BaziCalculatorInner() {
   const [gmtOffset,     setGmtOffset]     = useState(() => parseFloat(searchParams.get('gmt') ?? '3'))
   const [longitude,     setLongitude]     = useState(() => parseFloat(searchParams.get('lon') ?? '37.62'))
   const [useSolarTime,  setUseSolarTime]  = useState(() => searchParams.get('sol') === '1')
+  const [dst,           setDst]           = useState(() => searchParams.get('dst') === '1')
   const [dayChangeAt23, setDayChangeAt23] = useState(() => searchParams.get('d23') === '1')
   const [result,        setResult]        = useState<BaziResult | null>(null)
   const [viewMode,      setViewMode]      = useState<ViewMode>('bazi')
@@ -1206,6 +1207,7 @@ function BaziCalculatorInner() {
       lon: String(longitude),
       ...(noTime        && { nt: '1' }),
       ...(useSolarTime  && { sol: '1' }),
+      ...(dst           && { dst: '1' }),
       ...(dayChangeAt23 && { d23: '1' }),
     })
     router.replace(`/bazi?${params.toString()}`, { scroll: false })
@@ -1217,7 +1219,8 @@ function BaziCalculatorInner() {
       gender,
       gmtOffset,
       useSolarTime ? longitude : 0,
-      useSolarTime
+      useSolarTime,
+      useSolarTime ? (dst ? 1 : 0) : 0
     ))
   }
 
@@ -1325,6 +1328,10 @@ function BaziCalculatorInner() {
           <label style={s.checkLabel}>
             <input type="checkbox" checked={useSolarTime} onChange={e => setUseSolarTime(e.target.checked)} />
             Истинное солнечное время
+          </label>
+          <label style={{ ...s.checkLabel, opacity: useSolarTime ? 1 : 0.4, pointerEvents: useSolarTime ? 'auto' : 'none' }}>
+            <input type="checkbox" checked={dst} onChange={e => setDst(e.target.checked)} disabled={!useSolarTime} />
+            Летнее время (+1 час) при рождении
           </label>
           <label style={s.checkLabel}>
             <input type="checkbox" checked={dayChangeAt23} onChange={e => setDayChangeAt23(e.target.checked)} />

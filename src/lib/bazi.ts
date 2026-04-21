@@ -258,36 +258,43 @@ const JIEQI_MONTHS: Array<[number, number]> = [
 
 // Apply timezone offset and optional solar time correction
 // longitude in decimal degrees (east = positive)
+// dstOffset: 1 if DST (summer time) was in effect at birth, 0 otherwise
 export function applyTimeCorrection(
   year: number, month: number, day: number,
   hour: number, minute: number,
-  gmtOffset: number,    // e.g. +3 for Moscow
-  longitude: number,    // e.g. 37.62 for Moscow
-  useSolarTime: boolean
+  gmtOffset: number,    // e.g. +8 for Severobaikalsk
+  longitude: number,    // e.g. 109 for Severobaikalsk
+  useSolarTime: boolean,
+  dstOffset = 0         // 1 = летнее время было, 0 = не было
 ): { year: number; month: number; day: number; hour: number; minute: number; note: string } {
-  // Convert to UTC first
-  let totalMinutes = hour * 60 + minute - gmtOffset * 60
+  // Work directly in local minutes — no UTC conversion needed
+  // True Solar Time = Clock Time - DST offset - longitude correction
+  // Longitude correction = (standardMeridian - longitude) × 4 min
+  // If city is WEST of standard meridian → correction is positive → subtract from clock time
+  // If city is EAST of standard meridian → correction is negative → add to clock time
+  let totalMinutes = hour * 60 + minute
 
-  // Solar time correction: 4 minutes per degree difference from standard meridian
-  // Standard meridian = gmtOffset * 15 degrees (exact, no rounding)
   let solarNote = ''
   if (useSolarTime) {
     const standardMeridian = gmtOffset * 15
-    const longitudeDiff = longitude - standardMeridian
-    const correctionMinutes = longitudeDiff * 4  // keep fractional for accuracy
-    totalMinutes += correctionMinutes
-    const corrRounded = Math.round(correctionMinutes)
-    solarNote = corrRounded >= 0
-      ? `+${corrRounded} мин (долгота ${longitude > 0 ? '+' : ''}${longitude}°, стандарт ${standardMeridian}°)`
-      : `${corrRounded} мин (долгота ${longitude > 0 ? '+' : ''}${longitude}°, стандарт ${standardMeridian}°)`
+    // Positive when city is west of meridian (need to subtract time)
+    const correctionMinutes = (standardMeridian - longitude) * 4
+    // DST: if summer time was in effect, clock was 1h ahead → subtract 60 min
+    const dstMinutes = dstOffset * 60
+    const totalCorrection = correctionMinutes + dstMinutes
+    totalMinutes -= totalCorrection
+    const corrRounded = Math.round(totalCorrection)
+    const parts: string[] = []
+    parts.push(`долгота ${longitude}°, меридиан пояса ${standardMeridian}°`)
+    parts.push(`поправка ${Math.round(correctionMinutes) >= 0 ? '-' : '+'}${Math.abs(Math.round(correctionMinutes))} мин`)
+    if (dstOffset) parts.push('летнее время −60 мин')
+    solarNote = `итого ${corrRounded >= 0 ? '-' : '+'}${Math.abs(corrRounded)} мин (${parts.join(', ')})`
   }
 
-  // Convert back to local date/time handling day overflow
+  // Handle day overflow
   let d = day
   let m = month
   let y = year
-  // Re-add gmtOffset to get local
-  totalMinutes += gmtOffset * 60
   while (totalMinutes < 0) { totalMinutes += 1440; d -= 1 }
   while (totalMinutes >= 1440) { totalMinutes -= 1440; d += 1 }
 
@@ -762,7 +769,8 @@ export function calculateBazi(
   gender: 'male' | 'female' = 'female',
   gmtOffset = 0,
   longitude = 0,
-  useSolarTime = false
+  useSolarTime = false,
+  dstOffset = 0
 ): BaziResult {
   const currentYear = new Date().getFullYear()
 
@@ -772,7 +780,7 @@ export function calculateBazi(
 
   if (useSolarTime) {
     const corrected = applyTimeCorrection(
-      year, month, day, calcHour, calcMinute, gmtOffset, longitude, true
+      year, month, day, calcHour, calcMinute, gmtOffset, longitude, true, dstOffset
     )
     calcYear   = corrected.year
     calcMonth  = corrected.month
