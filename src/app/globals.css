@@ -925,7 +925,6 @@ footer {
 }
 @media (max-width: 680px) {
   nav { padding: 1rem 5vw; }
-  .nav-links { display: none; }
   .services-grid { grid-template-columns: 1fr; }
   .testi-grid { grid-template-columns: 1fr; }
   .process-grid { grid-template-columns: 1fr; }
