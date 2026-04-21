@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, CSSProperties } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { calculateBazi, ELEMENT_COLORS } from '@/lib/bazi'
 import type { BaziResult, Pillar, LuckCycle, YearlyCycle } from '@/lib/bazi'
 
@@ -1148,16 +1149,27 @@ function CitySearch({ onSelect }: {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function BaziCalculator() {
-  const [dateVal,       setDateVal]       = useState('1990-01-01')
-  const [timeVal,       setTimeVal]       = useState('12:00')
-  const [noTime,        setNoTime]        = useState(false)
-  const [gender,        setGender]        = useState<'male' | 'female'>('female')
-  const [gmtOffset,     setGmtOffset]     = useState(3)
-  const [longitude,     setLongitude]     = useState(37.62)
-  const [useSolarTime,  setUseSolarTime]  = useState(false)
-  const [dayChangeAt23, setDayChangeAt23] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  const [dateVal,       setDateVal]       = useState(() => searchParams.get('d') ?? '1990-01-01')
+  const [timeVal,       setTimeVal]       = useState(() => searchParams.get('t') ?? '12:00')
+  const [noTime,        setNoTime]        = useState(() => searchParams.get('nt') === '1')
+  const [gender,        setGender]        = useState<'male' | 'female'>(() => (searchParams.get('g') as 'male' | 'female') ?? 'female')
+  const [gmtOffset,     setGmtOffset]     = useState(() => parseFloat(searchParams.get('gmt') ?? '3'))
+  const [longitude,     setLongitude]     = useState(() => parseFloat(searchParams.get('lon') ?? '37.62'))
+  const [useSolarTime,  setUseSolarTime]  = useState(() => searchParams.get('sol') === '1')
+  const [dayChangeAt23, setDayChangeAt23] = useState(() => searchParams.get('d23') === '1')
   const [result,        setResult]        = useState<BaziResult | null>(null)
   const [viewMode,      setViewMode]      = useState<ViewMode>('bazi')
+  const [copyDone,      setCopyDone]      = useState(false)
+
+  // Auto-calculate if URL has params
+  useEffect(() => {
+    if (searchParams.get('d')) {
+      setTimeout(() => document.getElementById('bazi-calc-btn')?.click(), 100)
+    }
+  }, [])
 
   const handleCitySelect = (city: City) => {
     setGmtOffset(city.gmt)
@@ -1185,6 +1197,19 @@ export default function BaziCalculator() {
       calcHour = 23
     }
 
+    // Update URL with current params (no page reload)
+    const params = new URLSearchParams({
+      d: dateVal,
+      t: noTime ? '' : timeVal,
+      g: gender,
+      gmt: String(gmtOffset),
+      lon: String(longitude),
+      ...(noTime        && { nt: '1' }),
+      ...(useSolarTime  && { sol: '1' }),
+      ...(dayChangeAt23 && { d23: '1' }),
+    })
+    router.replace(`/bazi?${params.toString()}`, { scroll: false })
+
     setResult(calculateBazi(
       year, month, day,
       calcHour,
@@ -1196,6 +1221,16 @@ export default function BaziCalculator() {
     ))
   }
 
+  const handleCopyLink = () => {
+    const url = window.location.href
+    navigator.clipboard.writeText(url).then(() => {
+      setCopyDone(true)
+      setTimeout(() => setCopyDone(false), 2500)
+    })
+  }
+
+  const handlePrint = () => window.print()
+
   return (
     <section id="bazi" style={s.section}>
       <style>{`
@@ -1206,6 +1241,15 @@ export default function BaziCalculator() {
         }
         @media (max-width: 440px) {
           #bazi-luck { grid-template-columns: repeat(2,1fr) !important; }
+        }
+        @media print {
+          nav, footer, #bazi-form, #bazi-options, #bazi-share, #bazi-view-switcher { display: none !important; }
+          #bazi { padding: 1rem 0 !important; background: white !important; }
+          body { background: white !important; }
+          * { box-shadow: none !important; }
+          #bazi-result { display: block !important; }
+          #bazi-luck { grid-template-columns: repeat(5,1fr) !important; }
+          a[href]:after { content: none !important; }
         }
       `}</style>
 
@@ -1222,7 +1266,7 @@ export default function BaziCalculator() {
         </p>
 
         {/* Form */}
-        <div style={s.form}>
+        <div id="bazi-form" style={s.form}>
           <div style={s.fieldGroup}>
             <label style={s.fieldLabel} htmlFor="bazi-date">Дата рождения</label>
             <input
@@ -1262,6 +1306,7 @@ export default function BaziCalculator() {
 
           <div style={{ ...s.fieldGroup, justifyContent: 'flex-end' }}>
             <button
+              id="bazi-calc-btn"
               type="button" onClick={handleCalculate} style={s.submitBtn}
               onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--gold)' }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--ink)' }}
@@ -1272,7 +1317,7 @@ export default function BaziCalculator() {
         </div>
 
         {/* Options row */}
-        <div style={s.formOptions}>
+        <div id="bazi-options" style={s.formOptions}>
           <label style={s.checkLabel}>
             <input type="checkbox" checked={noTime} onChange={e => setNoTime(e.target.checked)} />
             Время рождения неизвестно
@@ -1322,8 +1367,46 @@ export default function BaziCalculator() {
               </div>
             </div>
 
+            {/* Share & Print bar */}
+            <div id="bazi-share" style={{
+              display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' as const, alignItems: 'center',
+            }}>
+              <button
+                onClick={handleCopyLink}
+                style={{
+                  fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                  letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                  color: copyDone ? '#2e7d32' : 'var(--ink)',
+                  background: copyDone ? '#e8f5e9' : 'var(--white)',
+                  border: `1px solid ${copyDone ? '#a5d6a7' : 'var(--line)'}`,
+                  padding: '.65rem 1.4rem', cursor: 'pointer', transition: 'all .2s',
+                  display: 'flex', alignItems: 'center', gap: '.5rem',
+                }}
+              >
+                {copyDone ? '✓ Ссылка скопирована' : '🔗 Скопировать ссылку'}
+              </button>
+              <button
+                onClick={handlePrint}
+                style={{
+                  fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                  letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                  color: 'var(--ink)', background: 'var(--white)',
+                  border: '1px solid var(--line)',
+                  padding: '.65rem 1.4rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '.5rem',
+                }}
+              >
+                🖨 Сохранить PDF
+              </button>
+              <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>
+                Ссылку можно переслать — карта откроется автоматически
+              </span>
+            </div>
+
             {/* View switcher */}
-            <ViewSwitcher mode={viewMode} onChange={setViewMode} />
+            <div id="bazi-view-switcher">
+              <ViewSwitcher mode={viewMode} onChange={setViewMode} />
+            </div>
 
             {/* ── Карта Бацзы ── */}
             {viewMode === 'bazi' && (
