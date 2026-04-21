@@ -4,37 +4,16 @@ import Link from 'next/link'
 
 export default function FloatingCalcBtn() {
   return (
-    <>
-      <style>{`
-        @media (min-width: 768px) {
-          .floating-calc-btn { display: none !important; }
-        }
-      `}</style>
-      <Link
-        href="/bazi"
-        className="floating-calc-btn"
-        style={{
-          position: 'fixed',
-          bottom: '1.8rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 300,
-          background: 'var(--gold)',
-          color: '#fff',
-          fontFamily: 'var(--sans)',
-          fontSize: '.75rem',
-          fontWeight: 700,
-          letterSpacing: '.12em',
-          textTransform: 'uppercase',
-          textDecoration: 'none',
-          padding: '.7rem 2rem',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 4px 20px rgba(158,123,40,.4)',
-          borderRadius: '2px',
-        }}
-      >
-        ✦ Калькулятор
+    <div className="bottom-bar">
+      <Link href="/bazi" className="bottom-bar-cta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+        Калькулятор Бацзы
       </Link>
-    </>
+      <a href="/#contact" className="bottom-bar-contact">
+        Записаться
+      </a>
+    </div>
   )
 }
