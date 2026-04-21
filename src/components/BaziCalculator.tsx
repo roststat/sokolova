@@ -1145,6 +1145,10 @@ function BaziCalculatorInner() {
       useSolarTime,
       dst
     ))
+
+    setTimeout(() => {
+      document.getElementById('bazi-result-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
   }
 
   // Show popup once when result appears and user scrolls past the pillars table
@@ -1412,6 +1416,7 @@ function BaziCalculatorInner() {
         </div>
 
         {/* ── Results ── */}
+        <div id="bazi-result-anchor" style={{ scrollMarginTop: '1rem' }} />
         {result && (
           <>
             {result.solarTimeNote && (
