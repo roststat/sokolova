@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, CSSProperties } from 'react'
+import { useState, useRef, useEffect, Suspense, CSSProperties } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { calculateBazi, ELEMENT_COLORS } from '@/lib/bazi'
 import type { BaziResult, Pillar, LuckCycle, YearlyCycle } from '@/lib/bazi'
@@ -1148,7 +1148,7 @@ function CitySearch({ onSelect }: {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function BaziCalculator() {
+function BaziCalculatorInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -1450,5 +1450,13 @@ export default function BaziCalculator() {
         )}
       </div>
     </section>
+  )
+}
+
+export default function BaziCalculator() {
+  return (
+    <Suspense fallback={<section style={{ padding: '8rem 5vw' }} />}>
+      <BaziCalculatorInner />
+    </Suspense>
   )
 }
