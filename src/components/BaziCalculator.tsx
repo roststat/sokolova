@@ -935,208 +935,6 @@ function YearlyCyclesTable({ cycles }: { cycles: YearlyCycle[] }) {
   )
 }
 
-// ── View switcher ────────────────────────────────────────────────────────────
-
-type ViewMode = 'bazi' | 'square'
-
-function ViewSwitcher({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
-  const opts: { value: ViewMode; label: string }[] = [
-    { value: 'bazi',   label: 'Карта Бацзы' },
-    { value: 'square', label: 'Карта ЦМ'   },
-  ]
-  return (
-    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-      {opts.map(o => (
-        <label key={o.value} style={{ display: 'flex', alignItems: 'center', gap: '.5rem', cursor: 'pointer', fontSize: '.9rem', color: mode === o.value ? 'var(--ink)' : 'var(--muted)', fontWeight: mode === o.value ? 600 : 400 }}>
-          <input
-            type="radio"
-            name="bazi-view"
-            checked={mode === o.value}
-            onChange={() => onChange(o.value)}
-            style={{ accentColor: 'var(--gold)', width: '15px', height: '15px' }}
-          />
-          {o.label}
-        </label>
-      ))}
-    </div>
-  )
-}
-
-// ── Qi Men Dun Jia view (奇門遁甲) ─────────────────────────────────────────────
-// 9 palaces (Lo Shu square) layout with current year/month pillars
-// Lo Shu order: SE=4, S=9, SW=2 / E=3, Center=5, W=7 / NE=8, N=1, NW=6
-
-// 8 Gates (八門) of Qi Men
-const QM_GATES = ['休','生','傷','杜','景','死','驚','開']
-const QM_GATES_RU = ['Покой','Жизнь','Рана','Преграда','Пейзаж','Смерть','Страх','Открытие']
-
-// 9 Stars (九星) of Qi Men
-const QM_STARS = ['天蓬','天芮','天冲','天辅','天禽','天心','天柱','天任','天英']
-const QM_STARS_RU = ['Пэн','Жуй','Чун','Фу','Цинь','Синь','Чжу','Жэнь','Ин']
-
-// 8 Spirits/Gods (八神)
-const QM_SPIRITS = ['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天']
-const QM_SPIRITS_RU = ['Страж','Змея','Иньское','Союз','Тигр','Воин','Земля','Небо']
-
-// Lo Shu palace positions (row, col) for palaces 1-9
-// Layout: row 0 = top (S side), row 2 = bottom (N side) per classical orientation
-// Displayed: top-left=SE(4), top-center=S(9), top-right=SW(2)
-//            mid-left=E(3),  center=5,        mid-right=W(7)
-//            bot-left=NE(8), bot-center=N(1), bot-right=NW(6)
-const LO_SHU_GRID = [
-  [4, 9, 2],
-  [3, 5, 7],
-  [8, 1, 6],
-]
-
-const PALACE_NAMES_RU: Record<number, string> = {
-  1: 'С (坎)', 2: 'ЮЗ (坤)', 3: 'В (震)',
-  4: 'ЮВ (巽)', 5: 'Центр (中)', 6: 'СЗ (乾)',
-  7: 'З (兌)', 8: 'СВ (艮)', 9: 'Ю (離)',
-}
-
-function getQmPalaceData(result: BaziResult) {
-  const currentYear = new Date().getFullYear()
-  const yearStemIdx = result.year.stemIndex
-  const monthStemIdx = result.month.stemIndex
-  const dayStemIdx = result.day.stemIndex
-
-  // Gate assignment: rotate gates based on day stem (simplified)
-  const gateOffset = dayStemIdx % 8
-  // Star assignment: rotate stars based on year stem
-  const starOffset = yearStemIdx % 9
-  // Spirit assignment: rotate spirits based on month stem
-  const spiritOffset = monthStemIdx % 8
-
-  const palaces: Record<number, {
-    palace: number
-    gate: string; gateRu: string
-    star: string; starRu: string
-    spirit: string; spiritRu: string
-    stem: string; stemEl: string
-    branch: string; branchEl: string
-  }> = {}
-
-  for (let i = 1; i <= 9; i++) {
-    if (i === 5) {
-      palaces[5] = {
-        palace: 5,
-        gate: '—', gateRu: '—',
-        star: QM_STARS[4], starRu: QM_STARS_RU[4],
-        spirit: '—', spiritRu: '—',
-        stem: result.day.stem, stemEl: result.day.stemElement,
-        branch: result.month.branch, branchEl: result.month.branchElement,
-      }
-      continue
-    }
-    const gIdx = ((i - 1 + gateOffset) % 8)
-    const sIdx = ((i - 1 + starOffset) % 9)
-    const spIdx = ((i - 1 + spiritOffset) % 8)
-    palaces[i] = {
-      palace: i,
-      gate: QM_GATES[gIdx], gateRu: QM_GATES_RU[gIdx],
-      star: QM_STARS[sIdx], starRu: QM_STARS_RU[sIdx],
-      spirit: QM_SPIRITS[spIdx], spiritRu: QM_SPIRITS_RU[spIdx],
-      stem: result.year.stem, stemEl: result.year.stemElement,
-      branch: result.year.branch, branchEl: result.year.branchElement,
-    }
-  }
-  return palaces
-}
-
-function SquareView({ result }: { result: BaziResult }) {
-  const palaces = getQmPalaceData(result)
-
-  const cellBase: CSSProperties = {
-    border: '1px solid var(--line)',
-    verticalAlign: 'top',
-    width: '33.33%',
-  }
-
-  const PalaceCell = ({ num }: { num: number }) => {
-    const p = palaces[num]
-    const isCenter = num === 5
-    const isDeath = p.gateRu === 'Смерть'
-    const isLife = p.gateRu === 'Жизнь' || p.gateRu === 'Открытие'
-
-    return (
-      <td style={{
-        ...cellBase,
-        background: isCenter ? 'var(--off)' : 'var(--white)',
-        padding: '.8rem .6rem',
-      }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '.3rem', alignItems: 'center', minHeight: '140px', justifyContent: 'center' }}>
-          {/* Palace number & direction */}
-          <div style={{ fontSize: '.65rem', fontWeight: 700, color: 'var(--gold)', letterSpacing: '.06em', textAlign: 'center' }}>
-            {PALACE_NAMES_RU[num]}
-          </div>
-
-          {/* Heavenly stem + Branch from pillars */}
-          <div style={{ display: 'flex', gap: '.2rem', alignItems: 'baseline', justifyContent: 'center' }}>
-            <span style={{ fontFamily: 'var(--serif)', fontSize: '1.8rem', fontWeight: 700, lineHeight: 1, color: ELEMENT_COLORS[p.stemEl]?.text ?? '#333' }}>
-              {p.stem}
-            </span>
-            <span style={{ fontFamily: 'var(--serif)', fontSize: '1.5rem', fontWeight: 700, lineHeight: 1, color: ELEMENT_COLORS[p.branchEl]?.text ?? '#555' }}>
-              {p.branch}
-            </span>
-          </div>
-
-          {/* Gate */}
-          {!isCenter && (
-            <div style={{
-              fontSize: '.72rem', fontWeight: 600, padding: '.1rem .5rem',
-              color: isDeath ? '#c62828' : isLife ? '#2e7d32' : 'var(--ink)',
-              background: isDeath ? '#fde8e8' : isLife ? '#e8f5e9' : 'var(--off)',
-              border: `1px solid ${isDeath ? '#ef9a9a' : isLife ? '#a5d6a7' : 'var(--line)'}`,
-              display: 'flex', alignItems: 'center', gap: '.25rem',
-            }}>
-              <span style={{ fontFamily: 'var(--serif)', fontSize: '1rem' }}>{p.gate}</span>
-              <span>{p.gateRu}</span>
-            </div>
-          )}
-
-          {/* Star */}
-          <div style={{ fontSize: '.68rem', color: '#1565c0', display: 'flex', alignItems: 'center', gap: '.2rem' }}>
-            <span style={{ fontFamily: 'var(--serif)', fontSize: '.85rem' }}>{p.star}</span>
-            <span style={{ color: 'var(--muted)' }}>{p.starRu}</span>
-          </div>
-
-          {/* Spirit */}
-          {!isCenter && (
-            <div style={{ fontSize: '.65rem', color: 'var(--muted)' }}>{p.spiritRu}</div>
-          )}
-
-          {isCenter && (
-            <div style={{ fontSize: '.7rem', color: 'var(--muted)', textAlign: 'center', lineHeight: 1.5, marginTop: '.2rem' }}>
-              {result.dayMaster.nameRu}<br />
-              {result.dayMaster.element} · {result.dayMaster.polarity}
-            </div>
-          )}
-        </div>
-      </td>
-    )
-  }
-
-  return (
-    <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-      <table style={{ borderCollapse: 'collapse', width: '100%', background: 'var(--white)', border: '1px solid var(--line)', minWidth: '480px', tableLayout: 'fixed' }}>
-        <tbody>
-          {LO_SHU_GRID.map((row, ri) => (
-            <tr key={ri}>
-              {row.map((num) => (
-                <PalaceCell key={num} num={num} />
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p style={{ fontSize: '.78rem', color: 'var(--faint)', marginTop: '1rem' }}>
-        Карта Ци Мен Дун Цзя: 9 дворцов Ло Шу. Врата (門), Звёзды (星) и Духи (神) рассчитаны от столпов дня, года и месяца. Для профессионального расчёта ЦМ используйте специализированный инструмент.
-      </p>
-    </div>
-  )
-}
-
 // ── City search autocomplete ──────────────────────────────────────────────────
 
 function CitySearch({ onSelect }: {
@@ -1260,7 +1058,6 @@ function BaziCalculatorInner() {
   const [dayChangeAt23, setDayChangeAt23] = useState(() => searchParams.get('d23') === '1')
   const [selectedCity,  setSelectedCity]  = useState<City | null>(null)
   const [result,        setResult]        = useState<BaziResult | null>(null)
-  const [viewMode,      setViewMode]      = useState<ViewMode>('bazi')
   const [copyDone,      setCopyDone]      = useState(false)
 
   // Auto-calculate if URL has params
@@ -1370,7 +1167,7 @@ function BaziCalculatorInner() {
           #bazi-luck { grid-template-columns: repeat(2,1fr) !important; }
         }
         @media print {
-          nav, footer, #bazi-form, #bazi-options, #bazi-share, #bazi-view-switcher { display: none !important; }
+          nav, footer, #bazi-form, #bazi-options, #bazi-share { display: none !important; }
           #bazi { padding: 1rem 0 !important; background: white !important; }
           body { background: white !important; }
           * { box-shadow: none !important; }
@@ -1546,44 +1343,27 @@ function BaziCalculatorInner() {
               </span>
             </div>
 
-            {/* View switcher */}
-            <div id="bazi-view-switcher">
-              <ViewSwitcher mode={viewMode} onChange={setViewMode} />
+            {/* ── Карта Бацзы ── */}
+            <SectionHeader title="Четыре столпа (四柱)" />
+            <div id="bazi-pillars-table">
+              <PillarsTable result={result} />
             </div>
 
-            {/* ── Карта Бацзы ── */}
-            {viewMode === 'bazi' && (
-              <>
-                <SectionHeader title="Четыре столпа (四柱)" />
-                <div id="bazi-pillars-table">
-                  <PillarsTable result={result} />
-                </div>
+            <SectionHeader title="Звёзды и знаки (神煞)" />
+            <StarsPanel stars={result.stars} />
 
-                <SectionHeader title="Звёзды и знаки (神煞)" />
-                <StarsPanel stars={result.stars} />
+            <SectionHeader title="Баланс стихий" />
+            <ElementBalance counts={result.elementCounts} />
 
-                <SectionHeader title="Баланс стихий" />
-                <ElementBalance counts={result.elementCounts} />
+            <SectionHeader title="Большие циклы удачи (大運)" />
+            <LuckCyclesSection
+              cycles={result.luckCycles}
+              birthYear={result.birthYear}
+              luckStartAge={result.luckStartAge}
+            />
 
-                <SectionHeader title="Большие циклы удачи (大運)" />
-                <LuckCyclesSection
-                  cycles={result.luckCycles}
-                  birthYear={result.birthYear}
-                  luckStartAge={result.luckStartAge}
-                />
-
-                <SectionHeader title="Годовые циклы (流年)" />
-                <YearlyCyclesTable cycles={result.yearlyCycles} />
-              </>
-            )}
-
-            {/* ── Карта ЦМ ── */}
-            {viewMode === 'square' && (
-              <>
-                <SectionHeader title="Карта ЦМ (奇門遁甲)" />
-                <SquareView result={result} />
-              </>
-            )}
+            <SectionHeader title="Годовые циклы (流年)" />
+            <YearlyCyclesTable cycles={result.yearlyCycles} />
 
             <p style={s.note}>
               Для точного расчёта важно знать точное время рождения (до минут) и место рождения.
