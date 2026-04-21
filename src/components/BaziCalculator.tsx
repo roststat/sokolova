@@ -1059,6 +1059,8 @@ function BaziCalculatorInner() {
   const [selectedCity,  setSelectedCity]  = useState<City | null>(null)
   const [result,        setResult]        = useState<BaziResult | null>(null)
   const [copyDone,      setCopyDone]      = useState(false)
+  const [popupVisible, setPopupVisible]  = useState(false)
+  const [popupDismissed, setPopupDismissed] = useState(false)
 
   // Auto-calculate if URL has params
   useEffect(() => {
@@ -1145,6 +1147,29 @@ function BaziCalculatorInner() {
     ))
   }
 
+  // Show popup once when result appears and user scrolls past the pillars table
+  useEffect(() => {
+    if (!result || popupDismissed) return
+    const target = document.getElementById('bazi-pillars-table')
+    if (!target) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry && entry.isIntersecting && !popupDismissed) {
+          setTimeout(() => setPopupVisible(true), 600)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.3 }
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [result, popupDismissed])
+
+  const dismissPopup = () => {
+    setPopupVisible(false)
+    setPopupDismissed(true)
+  }
+
   const handleCopyLink = () => {
     const url = window.location.href
     navigator.clipboard.writeText(url).then(() => {
@@ -1155,7 +1180,112 @@ function BaziCalculatorInner() {
 
   const handlePrint = () => window.print()
 
+  const TG_URL = 'https://t.me/yulia_sokolova'
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent('Моя карта Бацзы — посмотри!')}`
+
   return (
+    <>
+    {/* ── Popup ── */}
+    {popupVisible && (
+      <div
+        onClick={(e) => { if (e.target === e.currentTarget) dismissPopup() }}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(0,0,0,.45)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          padding: '0 1rem 2rem',
+          animation: 'fadeIn .25s ease',
+        }}
+      >
+        <style>{`@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+        <div style={{
+          background: 'var(--white)', border: '1px solid var(--line)',
+          maxWidth: '480px', width: '100%',
+          padding: '2rem 2rem 1.8rem',
+          position: 'relative',
+          animation: 'slideUp .3s ease',
+          boxShadow: '0 20px 60px rgba(0,0,0,.2)',
+        }}>
+          {/* close */}
+          <button onClick={dismissPopup} style={{
+            position: 'absolute', top: '1rem', right: '1rem',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '1.4rem', color: 'var(--muted)', lineHeight: 1,
+          }}>×</button>
+
+          {/* photo + text */}
+          <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-start', marginBottom: '1.4rem' }}>
+            <img src="/yulia.jpg" alt="Юлия Соколова" style={{
+              width: '56px', height: '56px', objectFit: 'cover', objectPosition: 'center top',
+              borderRadius: '50%', flexShrink: 0,
+              border: '2px solid var(--gold2)',
+            }} />
+            <div>
+              <div style={{ fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'var(--gold)', marginBottom: '.3rem' }}>
+                Юлия Соколова
+              </div>
+              <p style={{ fontSize: '.98rem', color: 'var(--ink)', lineHeight: 1.6, margin: 0 }}>
+                Отправьте результат мне — разберу и помогу с активацией.
+              </p>
+            </div>
+          </div>
+
+          {/* buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '.75rem' }}>
+            <a
+              href={tgShareUrl} target="_blank" rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
+                background: '#229ED9', color: '#fff',
+                fontFamily: 'var(--sans)', fontSize: '.85rem', fontWeight: 500,
+                letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                padding: '.85rem 1.4rem', textDecoration: 'none',
+                transition: 'opacity .2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
+              Переслать в Telegram
+            </a>
+            <a
+              href={TG_URL} target="_blank" rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
+                background: 'var(--ink)', color: 'var(--white)',
+                fontFamily: 'var(--sans)', fontSize: '.85rem', fontWeight: 500,
+                letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                padding: '.85rem 1.4rem', textDecoration: 'none',
+                transition: 'opacity .2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '.8')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              Написать Юле напрямую
+            </a>
+            <button
+              onClick={() => { handlePrint(); dismissPopup() }}
+              style={{
+                fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                color: 'var(--ink)', background: 'var(--white)',
+                border: '1px solid var(--line)',
+                padding: '.75rem 1.4rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+              }}
+            >
+              🖨 Сохранить PDF себе
+            </button>
+          </div>
+
+          <p style={{ fontSize: '.72rem', color: 'var(--muted)', marginTop: '1rem', textAlign: 'center' as const, lineHeight: 1.5 }}>
+            Ссылка на карту откроется у Юли автоматически
+          </p>
+        </div>
+      </div>
+    )}
+
     <section id="bazi" style={s.section}>
       <style>{`
         @media (max-width: 700px) {
@@ -1369,10 +1499,87 @@ function BaziCalculatorInner() {
               Для точного расчёта важно знать точное время рождения (до минут) и место рождения.
               При включённом «Истинном солнечном времени» применяется поправка на долготу города.
             </p>
+
+            {/* ── CTA block at bottom ── */}
+            <div style={{
+              marginTop: '3rem',
+              border: '1px solid var(--line)',
+              background: 'var(--white)',
+              padding: '2.2rem',
+              display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' as const,
+            }}>
+              {/* left: photo + bio */}
+              <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'flex-start', flexShrink: 0 }}>
+                <img src="/yulia.jpg" alt="Юлия Соколова" style={{
+                  width: '72px', height: '72px', objectFit: 'cover', objectPosition: 'center top',
+                  borderRadius: '50%', border: '2px solid var(--gold2)', flexShrink: 0,
+                }} />
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '.25rem' }}>
+                  <div style={{ fontSize: '.72rem', fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase' as const, color: 'var(--gold)' }}>
+                    Юлия Соколова
+                  </div>
+                  <div style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Мастер китайской метафизики</div>
+                </div>
+              </div>
+
+              {/* center: text */}
+              <div style={{ flex: 1, minWidth: '220px' }}>
+                <p style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--ink)', margin: '0 0 .6rem' }}>
+                  Карта построена — теперь разберём её вместе
+                </p>
+                <p style={{ fontSize: '.9rem', color: 'var(--muted)', lineHeight: 1.7, margin: 0 }}>
+                  Отправьте результат мне — разберу и помогу с активацией.
+                  Покажу, какие периоды сейчас работают на вас, и что сделать, чтобы усилить нужную энергию.
+                </p>
+              </div>
+
+              {/* right: buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '.75rem', minWidth: '200px' }}>
+                <a
+                  href={tgShareUrl} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
+                    background: '#229ED9', color: '#fff',
+                    fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                    letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                    padding: '.8rem 1.4rem', textDecoration: 'none',
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
+                  Переслать в Telegram
+                </a>
+                <a
+                  href={TG_URL} target="_blank" rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'var(--ink)', color: 'var(--white)',
+                    fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                    letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                    padding: '.8rem 1.4rem', textDecoration: 'none',
+                  }}
+                >
+                  Написать напрямую
+                </a>
+                <button
+                  onClick={handlePrint}
+                  style={{
+                    fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                    letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                    color: 'var(--ink)', background: 'var(--white)',
+                    border: '1px solid var(--line)',
+                    padding: '.75rem 1.4rem', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+                  }}
+                >
+                  🖨 Сохранить PDF
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>
     </section>
+    </>
   )
 }
 
