@@ -1305,13 +1305,14 @@ function BaziCalculatorInner() {
           #bazi-luck { grid-template-columns: repeat(2,1fr) !important; }
         }
         @media print {
-          nav, footer, #bazi-form, #bazi-options, #bazi-share { display: none !important; }
+          nav, footer, #bazi-form, #bazi-options, #bazi-share, #bazi-cta, .bottom-bar { display: none !important; }
           #bazi { padding: 1rem 0 !important; background: white !important; }
-          body { background: white !important; }
+          body { background: white !important; padding-bottom: 0 !important; }
           * { box-shadow: none !important; }
           #bazi-result { display: block !important; }
           #bazi-luck { grid-template-columns: repeat(5,1fr) !important; }
           a[href]:after { content: none !important; }
+          #bazi-print-params { display: block !important; }
         }
       `}</style>
 
@@ -1419,6 +1420,16 @@ function BaziCalculatorInner() {
         <div id="bazi-result-anchor" style={{ scrollMarginTop: '1rem' }} />
         {result && (
           <>
+            {/* print-only: параметры расчёта */}
+            <div id="bazi-print-params" style={{ display: 'none', marginBottom: '1.5rem', fontSize: '.85rem', color: '#555', borderBottom: '1px solid #ddd', paddingBottom: '1rem' }}>
+              <strong>Карта Бацзы</strong> &nbsp;·&nbsp;
+              Дата: {dateVal} &nbsp;·&nbsp;
+              {!noTime && <>Время: {timeVal} &nbsp;·&nbsp;</>}
+              Пол: {gender === 'female' ? 'Женский' : 'Мужской'} &nbsp;·&nbsp;
+              {selectedCity ? `${selectedCity.nameRu} (GMT${gmtOffset >= 0 ? '+' : ''}${gmtOffset})` : `GMT${gmtOffset >= 0 ? '+' : ''}${gmtOffset}`}
+              {useSolarTime && <> &nbsp;·&nbsp; Истинное солнечное время</>}
+            </div>
+
             {result.solarTimeNote && (
               <div style={s.solarNote}>
                 ☀ Коррекция истинного солнечного времени: {result.solarTimeNote}
@@ -1505,7 +1516,7 @@ function BaziCalculatorInner() {
             <YearlyCyclesTable cycles={result.yearlyCycles} />
 
             {/* ── CTA block at bottom ── */}
-            <div style={{
+            <div id="bazi-cta" style={{
               marginTop: '3rem',
               border: '1px solid var(--line)',
               background: 'var(--white)',
