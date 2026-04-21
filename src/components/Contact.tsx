@@ -12,7 +12,6 @@ export default function Contact() {
         </p>
         <div className="contact-buttons reveal">
           <a href="https://t.me/lovabazi" className="cbtn-gold">Написать в Telegram</a>
-          <a href="https://wa.me/" className="cbtn-outline">WhatsApp</a>
         </div>
 
         <div className="contact-info">

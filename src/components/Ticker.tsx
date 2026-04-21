@@ -30,6 +30,8 @@ export default function Ticker() {
         <TickerGroup />
         <TickerGroup />
         <TickerGroup />
+        <TickerGroup />
+        <TickerGroup />
       </div>
     </div>
   );

@@ -317,12 +317,20 @@ h1 em {
   background: var(--ink);
   overflow: hidden;
   padding: .85rem 0;
+  width: 100%;
 }
 .ticker-track {
   display: flex;
+  flex-wrap: nowrap;
   width: max-content;
+  min-width: 100%;
   animation: ticker 30s linear infinite;
   will-change: transform;
+}
+.ticker-track span {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 .ticker-item {
   font-size: .95rem;
@@ -332,9 +340,10 @@ h1 em {
   white-space: nowrap;
   font-family: var(--serif);
   font-style: italic;
+  flex-shrink: 0;
 }
-.ticker-sep { color: var(--gold3); font-size: .75rem; align-self: center; opacity: .6; }
-@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-25%); } }
+.ticker-sep { color: var(--gold3); font-size: .75rem; align-self: center; opacity: .6; flex-shrink: 0; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ── SECTION ── */
 .section { padding: 8rem 5vw; }
