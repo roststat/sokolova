@@ -1180,7 +1180,7 @@ function BaziCalculatorInner() {
 
   const handlePrint = () => window.print()
 
-  const TG_URL = 'https://t.me/yulia_sokolova'
+  const TG_URL = 'https://t.me/lovabazi'
   const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent('Моя карта Бацзы — посмотри!')}`
 

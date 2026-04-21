@@ -11,14 +11,14 @@ export default function Contact() {
           который подойдёт для вашего запроса.
         </p>
         <div className="contact-buttons reveal">
-          <a href="https://t.me/" className="cbtn-gold">Написать в Telegram</a>
+          <a href="https://t.me/lovabazi" className="cbtn-gold">Написать в Telegram</a>
           <a href="https://wa.me/" className="cbtn-outline">WhatsApp</a>
         </div>
 
         <div className="contact-info">
           <div className="contact-info-item">
             <div className="ci-label">Telegram</div>
-            <a href="https://t.me/" className="ci-val">@yulia_sokolova</a>
+            <a href="https://t.me/lovabazi" className="ci-val">@lovabazi</a>
           </div>
           <div className="contact-info-item">
             <div className="ci-label">Email</div>
