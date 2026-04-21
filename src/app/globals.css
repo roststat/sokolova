@@ -89,6 +89,7 @@ nav.scrolled {
   padding: 9rem 8vw 6rem;
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
 }
 
 .hero-left {
@@ -180,7 +181,7 @@ h1 em {
 .hero-desc {
   font-size: 1rem;
   color: var(--body);
-  max-width: 400px;
+  max-width: 580px;
   line-height: 1.8;
   margin-bottom: 2.8rem;
 }
