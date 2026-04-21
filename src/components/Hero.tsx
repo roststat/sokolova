@@ -6,10 +6,7 @@ export default function Hero() {
 
         <div className="hero-tag">Цимень · Бацзы · Выбор дат</div>
 
-        <h1>
-          Твоя судьба —<br />
-          <em>твоя стратегия</em>
-        </h1>
+        <h1>Твоя судьба — <em>твоя стратегия</em></h1>
 
         <p className="hero-sub">Китайская метафизика · Более 10 лет практики</p>
 
@@ -22,7 +19,9 @@ export default function Hero() {
           <a href="#contact" className="btn-primary">Записаться на консультацию</a>
           <a href="#services" className="btn-secondary">Об услугах</a>
         </div>
+      </div>
 
+      <div className="hero-stats-col">
         <div className="hero-stats">
           <div>
             <span className="stat-num">10+</span>
@@ -38,7 +37,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
     </section>
   );
 }
