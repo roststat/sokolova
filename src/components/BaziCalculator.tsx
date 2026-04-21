@@ -1233,37 +1233,41 @@ function BaziCalculatorInner() {
 
           {/* buttons */}
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '.75rem' }}>
-            <a
-              href={tgShareUrl} target="_blank" rel="noopener noreferrer"
+            {/* Step 1: copy link */}
+            <button
+              onClick={handleCopyLink}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
-                background: '#229ED9', color: '#fff',
                 fontFamily: 'var(--sans)', fontSize: '.85rem', fontWeight: 500,
                 letterSpacing: '.06em', textTransform: 'uppercase' as const,
-                padding: '.85rem 1.4rem', textDecoration: 'none',
-                transition: 'opacity .2s',
+                color: copyDone ? '#2e7d32' : 'var(--white)',
+                background: copyDone ? '#e8f5e9' : 'var(--ink)',
+                border: `1px solid ${copyDone ? '#a5d6a7' : 'var(--ink)'}`,
+                padding: '.85rem 1.4rem', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+                transition: 'all .2s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
-              Переслать в Telegram
-            </a>
-            <a
-              href={TG_URL} target="_blank" rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
-                background: 'var(--ink)', color: 'var(--white)',
-                fontFamily: 'var(--sans)', fontSize: '.85rem', fontWeight: 500,
-                letterSpacing: '.06em', textTransform: 'uppercase' as const,
-                padding: '.85rem 1.4rem', textDecoration: 'none',
-                transition: 'opacity .2s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '.8')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-            >
-              Написать Юле напрямую
-            </a>
+              {copyDone ? '✓ Ссылка скопирована' : '🔗 Скопировать ссылку на карту'}
+            </button>
+
+            {/* Step 2: appears after copy */}
+            {copyDone && (
+              <a
+                href={TG_URL} target="_blank" rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
+                  background: '#229ED9', color: '#fff',
+                  fontFamily: 'var(--sans)', fontSize: '.85rem', fontWeight: 500,
+                  letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                  padding: '.85rem 1.4rem', textDecoration: 'none',
+                  animation: 'slideUp .25s ease',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
+                Написать Юле в Telegram
+              </a>
+            )}
+
             <button
               onClick={() => { handlePrint(); dismissPopup() }}
               style={{
@@ -1280,7 +1284,7 @@ function BaziCalculatorInner() {
           </div>
 
           <p style={{ fontSize: '.72rem', color: 'var(--muted)', marginTop: '1rem', textAlign: 'center' as const, lineHeight: 1.5 }}>
-            Ссылка на карту откроется у Юли автоматически
+            {copyDone ? 'Вставьте ссылку в сообщение Юле — карта откроется автоматически' : 'Скопируйте ссылку и отправьте Юле для разбора'}
           </p>
         </div>
       </div>
@@ -1535,31 +1539,39 @@ function BaziCalculatorInner() {
 
               {/* right: buttons */}
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '.75rem', minWidth: '200px' }}>
-                <a
-                  href={tgShareUrl} target="_blank" rel="noopener noreferrer"
+                <button
+                  onClick={handleCopyLink}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
-                    background: '#229ED9', color: '#fff',
                     fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
                     letterSpacing: '.06em', textTransform: 'uppercase' as const,
-                    padding: '.8rem 1.4rem', textDecoration: 'none',
+                    color: copyDone ? '#2e7d32' : 'var(--white)',
+                    background: copyDone ? '#e8f5e9' : 'var(--ink)',
+                    border: `1px solid ${copyDone ? '#a5d6a7' : 'var(--ink)'}`,
+                    padding: '.8rem 1.4rem', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.5rem',
+                    transition: 'all .2s',
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
-                  Переслать в Telegram
-                </a>
-                <a
-                  href={TG_URL} target="_blank" rel="noopener noreferrer"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'var(--ink)', color: 'var(--white)',
-                    fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
-                    letterSpacing: '.06em', textTransform: 'uppercase' as const,
-                    padding: '.8rem 1.4rem', textDecoration: 'none',
-                  }}
-                >
-                  Написать напрямую
-                </a>
+                  {copyDone ? '✓ Ссылка скопирована' : '🔗 Скопировать ссылку'}
+                </button>
+
+                {copyDone && (
+                  <a
+                    href={TG_URL} target="_blank" rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.6rem',
+                      background: '#229ED9', color: '#fff',
+                      fontFamily: 'var(--sans)', fontSize: '.82rem', fontWeight: 500,
+                      letterSpacing: '.06em', textTransform: 'uppercase' as const,
+                      padding: '.8rem 1.4rem', textDecoration: 'none',
+                      animation: 'slideUp .25s ease',
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z" fill="white"/></svg>
+                    Написать Юле в Telegram
+                  </a>
+                )}
+
                 <button
                   onClick={handlePrint}
                   style={{
