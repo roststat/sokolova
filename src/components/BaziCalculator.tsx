@@ -1504,11 +1504,6 @@ function BaziCalculatorInner() {
             <SectionHeader title="Годовые циклы (流年)" />
             <YearlyCyclesTable cycles={result.yearlyCycles} />
 
-            <p style={s.note}>
-              Для точного расчёта важно знать точное время рождения (до минут) и место рождения.
-              При включённом «Истинном солнечном времени» применяется поправка на долготу города.
-            </p>
-
             {/* ── CTA block at bottom ── */}
             <div style={{
               marginTop: '3rem',
