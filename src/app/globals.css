@@ -944,7 +944,7 @@ footer {
   .hero-stats-col { flex-direction: row; border-left: none; border-top: 1px solid var(--line); margin-left: 0; padding-left: 0; padding-top: 2rem; min-width: unset; align-self: auto; }
   .hero-stats { flex-direction: row; gap: 2.5rem; }
   .about-grid { grid-template-columns: 1fr; gap: 3rem; }
-  .about-image { display: none; }
+  .about-image { max-width: 480px; width: 100%; margin: 0 auto; }
   .services-grid { grid-template-columns: 1fr 1fr; }
   .services-grid > * { border-bottom: 1px solid var(--line) !important; }
   .services-grid > *:nth-child(2n) { border-right: none; }
