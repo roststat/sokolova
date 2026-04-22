@@ -10,7 +10,10 @@ export default function Footer() {
         <li><a href="/#contact">Контакты</a></li>
         <li><a href="/bazi">Калькулятор Бацзы</a></li>
       </ul>
-      <div className="f-copy">© 2025 Юлия Соколова</div>
+      <div className="f-copy">
+        <a href="mailto:b-yulia20@yandex.ru">b-yulia20@yandex.ru</a>
+        <span> · </span>© 2025 Юлия Соколова
+      </div>
     </footer>
   );
 }
